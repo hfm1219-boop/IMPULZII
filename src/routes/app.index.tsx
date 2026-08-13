@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/impulzii/EmptyState";
 import { Award, Target, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/app/")({
-  head: () => ({ meta: [{ title: "Inicio · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Inicio · Kicker" }] }),
   component: Home,
 });
 

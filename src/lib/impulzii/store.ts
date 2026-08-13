@@ -68,18 +68,25 @@ function load() {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<Snapshot>;
       state = { ...initial(), ...parsed };
-      const storedUsers = (parsed.users ?? []).map((user) =>
-        !seedUsers.some((seedUser) => seedUser.id === user.id) &&
-        user.roles.includes("participant") &&
-        user.verification === "pending"
-          ? { ...user, verification: "verified" as const }
-          : user,
-      );
+      const storedUsers = (parsed.users ?? []).map((user) => {
+        const seedUser = seedUsers.find((item) => item.id === user.id);
+        const brandedUser = seedUser
+          ? { ...user, fullName: seedUser.fullName, email: seedUser.email }
+          : user;
+        return !seedUser &&
+          brandedUser.roles.includes("participant") &&
+          brandedUser.verification === "pending"
+          ? { ...brandedUser, verification: "verified" as const }
+          : brandedUser;
+      });
       state.users = [
         ...storedUsers,
         ...seedUsers.filter((seedUser) => !storedUsers.some((stored) => stored.id === seedUser.id)),
       ];
-      const storedRewards = parsed.rewards ?? [];
+      const storedRewards = (parsed.rewards ?? []).map((reward) => {
+        const seedReward = seedRewards.find((item) => item.id === reward.id);
+        return seedReward ? { ...reward, name: seedReward.name } : reward;
+      });
       state.rewards = [
         ...storedRewards,
         ...seedRewards.filter(

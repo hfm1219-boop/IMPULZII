@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/missions/")({
-  head: () => ({ meta: [{ title: "Misiones · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Misiones · Kicker" }] }),
   component: Missions,
 });
 

@@ -1,4 +1,4 @@
-// Impulzii — domain models
+// Kicker — domain models
 export type ProfileKind =
   | "waiter"
   | "bartender"

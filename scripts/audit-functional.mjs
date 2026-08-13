@@ -14,6 +14,7 @@ try {
   const store = await server.ssrLoadModule("/src/lib/impulzii/store.ts");
   const {
     AuthService,
+    CampaignService,
     ExecutionService,
     MissionService,
     RewardService,
@@ -25,6 +26,98 @@ try {
   const expectError = (callback, message) => {
     assert.throws(callback, message ? new RegExp(message, "i") : undefined);
   };
+
+  resetStore();
+  const baseState = getState();
+  expectError(
+    () =>
+      CampaignService.create({
+        name: "No autorizada",
+        brandId: baseState.brands[0].id,
+        description: "Prueba",
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 86400000).toISOString(),
+        budgetPoints: 1000,
+        status: "published",
+        targetCities: [],
+        targetVenueIds: [],
+        targetProfileKinds: [],
+        ownerUserId: "u_demo",
+        terms: "",
+      }),
+    "administrador",
+  );
+  const campaign = CampaignService.create({
+    name: "Campaña creada en auditoría",
+    brandId: baseState.brands[0].id,
+    description: "Campaña de prueba",
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 86400000).toISOString(),
+    budgetPoints: 1000,
+    status: "published",
+    targetCities: ["Barranquilla"],
+    targetVenueIds: ["v_caribe"],
+    targetProfileKinds: ["bartender"],
+    ownerUserId: "u_admin",
+    terms: "",
+  });
+  assert.ok(CampaignService.byId(campaign.id));
+  const createdMission = MissionService.create(
+    {
+      campaignId: campaign.id,
+      name: "Misión creada en auditoría",
+      description: "Prueba",
+      instructions: "Completar la actividad",
+      type: "survey",
+      startDate: campaign.startDate,
+      endDate: campaign.endDate,
+      rewardPoints: 100,
+      totalQuota: 10,
+      perUserQuota: 1,
+      frequency: "campaign",
+      requiresGeo: false,
+      requiresPhoto: false,
+      requiresVenueValidation: false,
+      requiresAudit: true,
+      targetProfileKinds: campaign.targetProfileKinds,
+      targetVenueIds: campaign.targetVenueIds,
+      targetCities: campaign.targetCities,
+      status: "active",
+      fields: [],
+    },
+    "u_admin",
+  );
+  assert.ok(MissionService.byId(createdMission.id));
+  const createdVenue = VenueService.create(
+    {
+      commercialName: "Punto Demo",
+      legalName: "Punto Demo SAS",
+      nit: "901999999-1",
+      type: "restaurant",
+      city: "Cartagena",
+      address: "Centro",
+      lat: 10.4,
+      lng: -75.5,
+      active: true,
+      joinCode: "PUNTO-DEMO",
+    },
+    "u_admin",
+  );
+  assert.ok(VenueService.byId(createdVenue.id));
+  const createdReward = RewardService.create(
+    {
+      name: "Beneficio demo",
+      description: "Prueba",
+      pointsRequired: 100,
+      stock: 5,
+      active: true,
+      merchantName: "Punto Demo",
+      merchantId: "punto_demo",
+      city: "Cartagena",
+    },
+    "u_admin",
+  );
+  assert.ok(RewardService.byId(createdReward.id));
 
   resetStore();
   setState((state) => {
@@ -162,7 +255,7 @@ try {
   assert.ok(AuthService.loginAs("u_buena_vida_admin")?.roles.includes("venue_admin"));
   assert.ok(AuthService.loginAs("u_admin")?.roles.includes("platform_admin"));
 
-  console.log("Auditoría funcional automatizada: 26 controles superados.");
+  console.log("Auditoría funcional automatizada: 34 controles superados.");
 } finally {
   await server.close();
 }

@@ -20,7 +20,20 @@ function ExecReview() {
   const navigate = useNavigate();
   const [note, setNote] = useState("");
   const exec = useLive(() => getState().executions.find((e) => e.id === id));
-  if (!exec || !user) return null;
+  if (!user) return null;
+  if (!exec) {
+    return (
+      <Card className="p-6 text-center">
+        <h1 className="font-bold">Ejecución no encontrada</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          La ejecución pudo haber sido eliminada o el enlace no es válido.
+        </p>
+        <Button asChild className="mt-4">
+          <Link to="/admin/executions">Volver a auditoría</Link>
+        </Button>
+      </Card>
+    );
+  }
 
   const mission = MissionService.byId(exec.missionId);
   const participant = getState().users.find((u) => u.id === exec.userId);

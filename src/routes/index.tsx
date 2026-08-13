@@ -6,13 +6,13 @@ import { Target, Award, Store, ShieldCheck } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Impulzii — Convierte tu turno en recompensas" },
+      { title: "Kicker — Convierte tu turno en recompensas" },
       {
         name: "description",
         content:
           "Meseros, bartenders, vendedores, promotores y tenderos: ejecuta misiones comerciales de tus marcas favoritas y gana puntos por cada actividad aprobada.",
       },
-      { property: "og:title", content: "Impulzii — Misiones comerciales con recompensas" },
+      { property: "og:title", content: "Kicker — Misiones comerciales con recompensas" },
       {
         property: "og:description",
         content:
@@ -48,8 +48,8 @@ function Landing() {
             en <span className="gradient-brand bg-clip-text text-transparent">recompensas</span>.
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground">
-            Impulzii conecta marcas y distribuidores con meseros, bartenders, vendedores, promotores
-            y tenderos que ejecutan actividades comerciales y ganan puntos por cada misión validada.
+            Kicker conecta marcas y distribuidores con meseros, bartenders, vendedores, promotores y
+            tenderos que ejecutan actividades comerciales y ganan puntos por cada misión validada.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/auth" search={{ mode: "register" }}>
@@ -98,7 +98,7 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Impulzii — impulzii.com
+        © {new Date().getFullYear()} Kicker — kicker.com
       </footer>
     </div>
   );

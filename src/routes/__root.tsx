@@ -79,14 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Impulzii — Misiones comerciales para tu establecimiento" },
+      { title: "Kicker — Misiones comerciales para tu establecimiento" },
       {
         name: "description",
         content:
           "Plataforma para publicar y ejecutar actividades comerciales en restaurantes, bares, hoteles, tiendas y puntos de venta. Gana puntos por cada misión completada.",
       },
-      { name: "author", content: "Impulzii" },
-      { property: "og:title", content: "Impulzii — Misiones comerciales" },
+      { name: "author", content: "Kicker" },
+      { property: "og:title", content: "Kicker — Misiones comerciales" },
       {
         property: "og:description",
         content:
@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Impulzii" },
+      { name: "twitter:site", content: "@Kicker" },
     ],
     links: [
       {

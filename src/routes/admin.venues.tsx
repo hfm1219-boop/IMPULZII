@@ -4,9 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { useLive } from "@/lib/impulzii/auth-context";
 import { getState } from "@/lib/impulzii/store";
 import { VenueService } from "@/lib/impulzii/services";
+import { CreateVenueDialog } from "@/components/impulzii/AdminCreateDialogs";
 
 export const Route = createFileRoute("/admin/venues")({
-  head: () => ({ meta: [{ title: "Establecimientos · Impulzii Admin" }] }),
+  head: () => ({ meta: [{ title: "Establecimientos · Kicker Admin" }] }),
   component: Venues,
 });
 
@@ -14,11 +15,14 @@ function Venues() {
   const state = useLive(() => getState());
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-2xl font-black">Establecimientos</h1>
-        <p className="text-sm text-muted-foreground">
-          Puntos de venta registrados y participantes vinculados.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-black">Establecimientos</h1>
+          <p className="text-sm text-muted-foreground">
+            Puntos de venta registrados y participantes vinculados.
+          </p>
+        </div>
+        <CreateVenueDialog />
       </header>
       <div className="grid gap-3 md:grid-cols-2">
         {state.venues.map((v) => {

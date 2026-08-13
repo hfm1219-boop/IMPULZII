@@ -1,29 +1,33 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet, useRouterState } from "@tanstack/react-router";
 import { AdminSidebar } from "@/components/impulzii/AdminSidebar";
-import { AuthService } from "@/lib/impulzii/services";
+import { useAuth } from "@/lib/impulzii/auth-context";
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: ({ location }) => {
-    const u = AuthService.currentUser();
-    if (!u) throw redirect({ to: "/auth" });
-    if (!u.roles.some((r) => ["platform_admin", "auditor", "venue_admin"].includes(r))) {
-      throw redirect({ to: "/app" });
-    }
-    if (u.roles.includes("platform_admin")) return;
-    if (u.roles.includes("auditor")) {
-      if (!location.pathname.startsWith("/admin/executions")) {
-        throw redirect({ to: "/admin/executions" });
-      }
-      return;
-    }
-    if (u.roles.includes("venue_admin") && location.pathname !== "/admin/redemptions") {
-      throw redirect({ to: "/admin/redemptions" });
-    }
-  },
   component: AdminLayout,
 });
 
 function AdminLayout() {
+  const { user, ready } = useAuth();
+  const path = useRouterState({ select: (state) => state.location.pathname });
+  if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!user) return <Navigate to="/auth" />;
+  if (!user.roles.some((role) => ["platform_admin", "auditor", "venue_admin"].includes(role))) {
+    return <Navigate to="/app" />;
+  }
+  if (
+    !user.roles.includes("platform_admin") &&
+    user.roles.includes("auditor") &&
+    !path.startsWith("/admin/executions")
+  ) {
+    return <Navigate to="/admin/executions" />;
+  }
+  if (
+    !user.roles.includes("platform_admin") &&
+    user.roles.includes("venue_admin") &&
+    path !== "/admin/redemptions"
+  ) {
+    return <Navigate to="/admin/redemptions" />;
+  }
   return (
     <div className="min-h-screen flex bg-background">
       <AdminSidebar />

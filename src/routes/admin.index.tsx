@@ -7,7 +7,7 @@ import { MissionService } from "@/lib/impulzii/services";
 import { Users, Target, ClipboardCheck, Store } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Panel · Impulzii Admin" }] }),
+  head: () => ({ meta: [{ title: "Panel · Kicker Admin" }] }),
   component: AdminDash,
 });
 
@@ -26,7 +26,7 @@ function AdminDash() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-black">Panel de control</h1>
-        <p className="text-sm text-muted-foreground">Resumen operativo de Impulzii.</p>
+        <p className="text-sm text-muted-foreground">Resumen operativo de Kicker.</p>
       </header>
 
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">

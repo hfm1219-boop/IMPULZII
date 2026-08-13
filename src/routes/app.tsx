@@ -1,17 +1,16 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet } from "@tanstack/react-router";
 import { BottomNav } from "@/components/impulzii/BottomNav";
-import { AuthService } from "@/lib/impulzii/services";
+import { useAuth } from "@/lib/impulzii/auth-context";
 
 export const Route = createFileRoute("/app")({
-  beforeLoad: () => {
-    const u = AuthService.currentUser();
-    if (!u) throw redirect({ to: "/auth" });
-    if (!u.roles.includes("participant")) throw redirect({ to: "/admin" });
-  },
   component: AppLayout,
 });
 
 function AppLayout() {
+  const { user, ready } = useAuth();
+  if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!user) return <Navigate to="/auth" />;
+  if (!user.roles.includes("participant")) return <Navigate to="/admin" />;
   return (
     <div className="min-h-screen bg-background md:flex">
       <BottomNav />

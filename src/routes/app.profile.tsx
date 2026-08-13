@@ -10,7 +10,7 @@ import { LogOut, Store } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/profile")({
-  head: () => ({ meta: [{ title: "Mi perfil · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Mi perfil · Kicker" }] }),
   component: Profile,
 });
 

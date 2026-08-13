@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/impulzii/EmptyState";
 import type { ExecutionStatus } from "@/lib/impulzii/types";
 
 export const Route = createFileRoute("/admin/executions/")({
-  head: () => ({ meta: [{ title: "Auditoría · Impulzii Admin" }] }),
+  head: () => ({ meta: [{ title: "Auditoría · Kicker Admin" }] }),
   component: List,
 });
 

@@ -29,8 +29,8 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Ingresar a Impulzii" },
-      { name: "description", content: "Inicia sesión o crea tu cuenta en Impulzii." },
+      { title: "Ingresar a Kicker" },
+      { name: "description", content: "Inicia sesión o crea tu cuenta en Kicker." },
     ],
   }),
   component: AuthPage,
@@ -111,7 +111,7 @@ function AuthPage() {
 }
 
 function LoginForm({ onDone }: { onDone: (role: string) => void }) {
-  const [email, setEmail] = useState("demo@impulzii.com");
+  const [email, setEmail] = useState("demo@kicker.com");
   const [password, setPassword] = useState("demo");
   return (
     <form

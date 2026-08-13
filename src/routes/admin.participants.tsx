@@ -9,7 +9,7 @@ import { PROFILE_KIND_LABELS } from "@/lib/impulzii/types";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/participants")({
-  head: () => ({ meta: [{ title: "Participantes · Impulzii Admin" }] }),
+  head: () => ({ meta: [{ title: "Participantes · Kicker Admin" }] }),
   component: Participants,
 });
 

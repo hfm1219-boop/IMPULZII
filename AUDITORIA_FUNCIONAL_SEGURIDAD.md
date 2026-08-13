@@ -1,4 +1,4 @@
-# Auditoría funcional y de seguridad — Impulzii demo
+# Auditoría funcional y de seguridad — Kicker demo
 
 Fecha: 13 de agosto de 2026
 

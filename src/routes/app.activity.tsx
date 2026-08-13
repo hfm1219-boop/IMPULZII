@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/impulzii/StatusBadge";
 import { EmptyState } from "@/components/impulzii/EmptyState";
 
 export const Route = createFileRoute("/app/activity")({
-  head: () => ({ meta: [{ title: "Actividad · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Actividad · Kicker" }] }),
   component: Activity,
 });
 

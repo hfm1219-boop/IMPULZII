@@ -8,7 +8,7 @@ import { DynamicField } from "@/components/impulzii/DynamicField";
 import { MissionService, ExecutionService, VenueService } from "@/lib/impulzii/services";
 import { useAuth } from "@/lib/impulzii/auth-context";
 import type { Evidence } from "@/lib/impulzii/types";
-import { ArrowLeft, MapPin, Send } from "lucide-react";
+import { AlertCircle, ArrowLeft, MapPin, Send } from "lucide-react";
 
 export const Route = createFileRoute("/app/missions_/$id/execute")({
   component: ExecutePage,
@@ -132,6 +132,18 @@ function ExecutePage() {
         <h1 className="text-xl font-black">{mission.name}</h1>
         <p className="text-sm text-muted-foreground">Completa los campos y envía tu evidencia.</p>
       </div>
+
+      {execution?.reviewNotes && (
+        <Card className="border-orange-500/40 bg-orange-500/5 p-4">
+          <div className="flex gap-2 text-sm">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+            <div>
+              <p className="font-semibold">Corrección solicitada por auditoría</p>
+              <p className="mt-1 text-muted-foreground">{execution.reviewNotes}</p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <div className="sticky top-0 z-10 bg-background pt-2 pb-3">
         <div className="flex items-center justify-between text-xs mb-1">

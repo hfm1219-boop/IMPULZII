@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/impulzii/EmptyState";
 import { Award } from "lucide-react";
 
 export const Route = createFileRoute("/app/wallet")({
-  head: () => ({ meta: [{ title: "Wallet · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Wallet · Kicker" }] }),
   component: Wallet,
 });
 

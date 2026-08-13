@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useLive } from "@/lib/impulzii/auth-context";
 import { RewardService } from "@/lib/impulzii/services";
 import { getState } from "@/lib/impulzii/store";
+import { CreateRewardDialog } from "@/components/impulzii/AdminCreateDialogs";
 
 export const Route = createFileRoute("/admin/rewards")({
   component: RewardsAdmin,
@@ -22,11 +23,14 @@ function RewardsAdmin() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black">Recompensas</h1>
-        <p className="text-sm text-muted-foreground">
-          Catálogo, inventario y trazabilidad de redenciones.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-black">Recompensas</h1>
+          <p className="text-sm text-muted-foreground">
+            Catálogo, inventario y trazabilidad de redenciones.
+          </p>
+        </div>
+        <CreateRewardDialog />
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <Metric icon={Clock3} label="Tokens vigentes" value={pending} />

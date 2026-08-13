@@ -7,7 +7,7 @@ import { useAuth, useLive } from "@/lib/impulzii/auth-context";
 import { RewardService, WalletService } from "@/lib/impulzii/services";
 
 export const Route = createFileRoute("/app/rewards")({
-  head: () => ({ meta: [{ title: "Redimir en Cartagena · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Redimir en Cartagena · Kicker" }] }),
   component: Rewards,
 });
 
@@ -143,9 +143,15 @@ function Rewards() {
                   >
                     {redemption.status === "delivered"
                       ? "Utilizado"
-                      : expired
-                        ? "Vencido"
-                        : "Vigente"}
+                      : redemption.status === "cancelled"
+                        ? expired
+                          ? "Vencido"
+                          : "Cancelado"
+                        : redemption.status === "rejected"
+                          ? "Rechazado"
+                          : expired
+                            ? "Vencido"
+                            : "Vigente"}
                   </span>
                 </div>
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3">

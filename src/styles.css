@@ -53,7 +53,7 @@
 
 :root {
   --radius: 0.75rem;
-  /* Impulzii — lima energia */
+  /* Kicker — lima energia */
   --background: oklch(0.99 0.005 280);
   --foreground: oklch(0.18 0.04 280);
   --card: oklch(1 0 0);

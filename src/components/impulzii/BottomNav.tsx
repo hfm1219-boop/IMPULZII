@@ -16,11 +16,11 @@ export function BottomNav() {
       <div className="hidden md:block px-4 pb-4">
         <Link
           to="/"
-          aria-label="Ir a la página de bienvenida de Impulzii"
+          aria-label="Ir a la página de bienvenida de Kicker"
           className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <div className="text-xl font-black tracking-tight">
-            Impulz<span className="text-primary">ii</span>
+            Kick<span className="text-primary">er</span>
           </div>
         </Link>
       </div>

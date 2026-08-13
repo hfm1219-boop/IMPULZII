@@ -38,6 +38,13 @@ function updatedStatus(mission: Mission): ExecutionStatus {
   return mission.requiresAudit ? "in_review" : "approved";
 }
 
+function requirePlatformAdmin(userId: string) {
+  const user = getState().users.find((item) => item.id === userId);
+  if (!user?.active || !user.roles.includes("platform_admin")) {
+    throw new Error("Solo el administrador de plataforma puede realizar esta acción");
+  }
+}
+
 function frequencyWindowStart(mission: Mission, now = new Date()): number {
   if (["once", "campaign"].includes(mission.frequency)) return Number.NEGATIVE_INFINITY;
   const start = new Date(now);
@@ -186,11 +193,19 @@ export const VenueService = {
   byId(id: string): Venue | undefined {
     return getState().venues.find((v) => v.id === id);
   },
-  create(v: Omit<Venue, "id">): Venue {
+  create(v: Omit<Venue, "id">, actorUserId: string): Venue {
+    requirePlatformAdmin(actorUserId);
+    if (!v.commercialName.trim() || !v.legalName.trim() || !v.nit.trim()) {
+      throw new Error("Completa la información obligatoria del establecimiento");
+    }
+    if (getState().venues.some((item) => item.nit === v.nit.trim())) {
+      throw new Error("Ya existe un establecimiento con este NIT");
+    }
     const nv: Venue = { ...v, id: uid("v") };
     setState((s) => {
       s.venues = [...s.venues, nv];
     });
+    log(actorUserId, "venue_create", "venue", nv.id);
     return nv;
   },
   membershipsForUser(userId: string): VenueMembership[] {
@@ -279,6 +294,17 @@ export const CampaignService = {
     return getState().campaigns.find((c) => c.id === id);
   },
   create(c: Omit<Campaign, "id">): Campaign {
+    requirePlatformAdmin(c.ownerUserId);
+    if (!c.name.trim() || !c.description.trim()) throw new Error("Completa nombre y descripción");
+    if (!getState().brands.some((brand) => brand.id === c.brandId)) {
+      throw new Error("Selecciona una marca válida");
+    }
+    if (new Date(c.startDate) > new Date(c.endDate)) {
+      throw new Error("La fecha final debe ser posterior a la inicial");
+    }
+    if (!Number.isFinite(c.budgetPoints) || c.budgetPoints <= 0) {
+      throw new Error("El presupuesto debe ser mayor que cero");
+    }
     const nc: Campaign = { ...c, id: uid("c") };
     setState((s) => {
       s.campaigns = [...s.campaigns, nc];
@@ -304,11 +330,26 @@ export const MissionService = {
   byCampaign(campaignId: string): Mission[] {
     return getState().missions.filter((m) => m.campaignId === campaignId);
   },
-  create(m: Omit<Mission, "id">): Mission {
+  create(m: Omit<Mission, "id">, actorUserId: string): Mission {
+    requirePlatformAdmin(actorUserId);
+    const campaign = getState().campaigns.find((item) => item.id === m.campaignId);
+    if (!campaign) throw new Error("Selecciona una campaña válida");
+    if (!m.name.trim() || !m.instructions.trim())
+      throw new Error("Completa nombre e instrucciones");
+    if (new Date(m.startDate) > new Date(m.endDate)) {
+      throw new Error("La fecha final debe ser posterior a la inicial");
+    }
+    if (m.rewardPoints <= 0 || m.totalQuota <= 0 || m.perUserQuota <= 0) {
+      throw new Error("Puntos y cupos deben ser mayores que cero");
+    }
+    if (m.perUserQuota > m.totalQuota) {
+      throw new Error("El cupo por participante no puede superar el cupo total");
+    }
     const nm: Mission = { ...m, id: uid("mi") };
     setState((s) => {
       s.missions = [...s.missions, nm];
     });
+    log(actorUserId, "mission_create", "mission", nm.id);
     return nm;
   },
   getAvailableMissions(userId: string): Mission[] {
@@ -699,6 +740,24 @@ export const RewardService = {
   },
   byId(id: string): Reward | undefined {
     return getState().rewards.find((r) => r.id === id);
+  },
+  create(reward: Omit<Reward, "id">, actorUserId: string): Reward {
+    requirePlatformAdmin(actorUserId);
+    if (!reward.name.trim() || !reward.description.trim()) {
+      throw new Error("Completa nombre y descripción de la recompensa");
+    }
+    if (reward.pointsRequired <= 0 || reward.stock < 0) {
+      throw new Error("Créditos e inventario no son válidos");
+    }
+    if (!reward.merchantName?.trim() || !reward.merchantId?.trim()) {
+      throw new Error("Define el comercio autorizado");
+    }
+    const created: Reward = { ...reward, id: uid("r") };
+    setState((state) => {
+      state.rewards = [...state.rewards, created];
+    });
+    log(actorUserId, "reward_create", "reward", created.id);
+    return created;
   },
   redeem(userId: string, rewardId: string): Redemption {
     reconcileExpiredRedemptions();
