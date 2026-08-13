@@ -58,9 +58,7 @@ function AuthPage() {
               <LoginForm
                 onDone={(role) => {
                   refresh();
-                  navigate({
-                    to: role === "participant" ? "/app" : "/admin",
-                  });
+                  navigate({ to: role === "participant" ? "/app" : "/admin" });
                 }}
               />
             </TabsContent>
@@ -92,7 +90,11 @@ function AuthPage() {
                       refresh();
                       toast.success(`Sesión iniciada como ${usr.fullName}`);
                       navigate({
-                        to: usr.roles.includes("participant") ? "/app" : "/admin",
+                        to: usr.roles.some((role) =>
+                          ["platform_admin", "auditor", "venue_admin"].includes(role),
+                        )
+                          ? "/admin"
+                          : "/app",
                       });
                     }
                   }}
@@ -126,7 +128,11 @@ function LoginForm({ onDone }: { onDone: (role: string) => void }) {
           return;
         }
         toast.success(`Bienvenido, ${user.fullName}`);
-        onDone(user.roles[0]);
+        onDone(
+          user.roles.some((role) => ["platform_admin", "auditor", "venue_admin"].includes(role))
+            ? "admin"
+            : "participant",
+        );
       }}
     >
       <div>

@@ -37,7 +37,9 @@ function Participants() {
               </div>
               <div className="text-right shrink-0">
                 <div className="text-sm font-black text-primary">{b.available} pts</div>
-                <Badge variant={p.active ? "default" : "outline"}>{p.active ? "activo" : "inactivo"}</Badge>
+                <Badge variant={p.active ? "default" : "outline"}>
+                  {p.active ? "activo" : "inactivo"}
+                </Badge>
               </div>
             </Card>
           );

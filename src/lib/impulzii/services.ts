@@ -34,6 +34,62 @@ function inDate(m: Mission, when = new Date()): boolean {
   return new Date(m.startDate) <= when && when <= new Date(m.endDate);
 }
 
+function updatedStatus(mission: Mission): ExecutionStatus {
+  return mission.requiresAudit ? "in_review" : "approved";
+}
+
+function frequencyWindowStart(mission: Mission, now = new Date()): number {
+  if (["once", "campaign"].includes(mission.frequency)) return Number.NEGATIVE_INFINITY;
+  const start = new Date(now);
+  if (mission.frequency === "daily") start.setHours(0, 0, 0, 0);
+  if (mission.frequency === "weekly") {
+    const day = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - day);
+    start.setHours(0, 0, 0, 0);
+  }
+  if (mission.frequency === "monthly") {
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+  }
+  return start.getTime();
+}
+
+function reconcileExpiredRedemptions() {
+  const now = Date.now();
+  if (
+    !getState().redemptions.some(
+      (redemption) =>
+        redemption.status === "requested" && new Date(redemption.expiresAt).getTime() <= now,
+    )
+  ) {
+    return;
+  }
+  setState((s) => {
+    const expired = s.redemptions.filter(
+      (redemption) =>
+        redemption.status === "requested" && new Date(redemption.expiresAt).getTime() <= now,
+    );
+    if (!expired.length) return;
+    const ids = new Set(expired.map((redemption) => redemption.id));
+    s.redemptions = s.redemptions.map((redemption) =>
+      ids.has(redemption.id) ? { ...redemption, status: "cancelled" } : redemption,
+    );
+    s.wallet = s.wallet.map((transaction) =>
+      transaction.redemptionId && ids.has(transaction.redemptionId)
+        ? { ...transaction, status: "reversed" }
+        : transaction,
+    );
+    const restored = new Map<string, number>();
+    for (const redemption of expired) {
+      restored.set(redemption.rewardId, (restored.get(redemption.rewardId) ?? 0) + 1);
+    }
+    s.rewards = s.rewards.map((reward) => ({
+      ...reward,
+      stock: reward.stock + (restored.get(reward.id) ?? 0),
+    }));
+  });
+}
+
 function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
   const R = 6371000;
   const toRad = (x: number) => (x * Math.PI) / 180;
@@ -50,10 +106,10 @@ export const AuthService = {
   currentUser(): User | null {
     const s = getState();
     if (!s.currentUserId) return null;
-    return s.users.find((u) => u.id === s.currentUserId) ?? null;
+    return s.users.find((u) => u.id === s.currentUserId && u.active) ?? null;
   },
   loginAs(userId: string): User | null {
-    const u = getState().users.find((x) => x.id === userId);
+    const u = getState().users.find((x) => x.id === userId && x.active);
     if (!u) return null;
     setState((s) => {
       s.currentUserId = u.id;
@@ -61,7 +117,8 @@ export const AuthService = {
     return u;
   },
   loginByEmail(email: string): User | null {
-    const u = getState().users.find((x) => x.email.toLowerCase() === email.toLowerCase());
+    const normalized = email.trim().toLowerCase();
+    const u = getState().users.find((x) => x.active && x.email.toLowerCase() === normalized);
     if (!u) return null;
     setState((s) => {
       s.currentUserId = u.id;
@@ -69,8 +126,19 @@ export const AuthService = {
     return u;
   },
   register(input: Omit<User, "id" | "roles" | "verification" | "active" | "createdAt">): User {
+    const normalizedEmail = input.email.trim().toLowerCase();
+    const normalizedDocument = input.docNumber.trim();
+    const users = getState().users;
+    if (users.some((user) => user.email.toLowerCase() === normalizedEmail)) {
+      throw new Error("Ya existe una cuenta con este correo");
+    }
+    if (users.some((user) => user.docNumber === normalizedDocument)) {
+      throw new Error("Ya existe una cuenta con este documento");
+    }
     const user: User = {
       ...input,
+      email: normalizedEmail,
+      docNumber: normalizedDocument,
       id: uid("u"),
       roles: ["participant"],
       verification: "pending",
@@ -132,6 +200,13 @@ export const VenueService = {
     return getState().memberships.filter((m) => m.venueId === venueId);
   },
   requestMembership(userId: string, venueId: string): VenueMembership {
+    const state = getState();
+    if (!state.users.some((user) => user.id === userId && user.active)) {
+      throw new Error("Participante no encontrado o inactivo");
+    }
+    if (!state.venues.some((venue) => venue.id === venueId && venue.active)) {
+      throw new Error("Establecimiento no encontrado o inactivo");
+    }
     const existing = getState().memberships.find(
       (m) => m.userId === userId && m.venueId === venueId,
     );
@@ -239,20 +314,53 @@ export const MissionService = {
   getAvailableMissions(userId: string): Mission[] {
     const s = getState();
     const user = s.users.find((u) => u.id === userId);
-    if (!user) return [];
+    if (!user?.active || !user.roles.includes("participant") || user.verification !== "verified") {
+      return [];
+    }
     const approvedVenues = s.memberships
-      .filter((m) => m.userId === userId && m.status === "approved")
+      .filter(
+        (membership) =>
+          membership.userId === userId &&
+          membership.status === "approved" &&
+          s.venues.some((venue) => venue.id === membership.venueId && venue.active),
+      )
       .map((m) => m.venueId);
     return s.missions.filter((m) => {
       if (m.status !== "active" || !inDate(m)) return false;
       const campaign = s.campaigns.find((c) => c.id === m.campaignId);
-      if (!campaign || campaign.status !== "published") return false;
+      if (
+        !campaign ||
+        campaign.status !== "published" ||
+        new Date(campaign.startDate) > new Date() ||
+        new Date(campaign.endDate) < new Date()
+      ) {
+        return false;
+      }
+      if (campaign.targetCities.length && !campaign.targetCities.includes(user.city)) return false;
+      if (
+        campaign.targetProfileKinds.length &&
+        !campaign.targetProfileKinds.includes(user.profileKind)
+      ) {
+        return false;
+      }
+      if (
+        campaign.targetVenueIds.length &&
+        !campaign.targetVenueIds.some((venueId) => approvedVenues.includes(venueId))
+      ) {
+        return false;
+      }
       if (m.targetCities.length && !m.targetCities.includes(user.city)) return false;
       if (m.targetProfileKinds.length && !m.targetProfileKinds.includes(user.profileKind))
         return false;
       if (m.targetVenueIds.length && !m.targetVenueIds.some((v) => approvedVenues.includes(v)))
         return false;
-      const userExecs = s.executions.filter((e) => e.userId === userId && e.missionId === m.id);
+      const userExecs = s.executions.filter(
+        (e) =>
+          e.userId === userId &&
+          e.missionId === m.id &&
+          e.status !== "rejected" &&
+          new Date(e.acceptedAt ?? 0).getTime() >= frequencyWindowStart(m),
+      );
       if (userExecs.length >= m.perUserQuota) return false;
       const totalNonRejected = s.executions.filter(
         (e) => e.missionId === m.id && e.status !== "rejected",
@@ -285,9 +393,13 @@ export const ExecutionService = {
   accept(userId: string, missionId: string): Execution {
     const mission = MissionService.byId(missionId);
     if (!mission) throw new Error("Misión no encontrada");
+    if (mission.status !== "active") throw new Error("La misión no está activa");
     if (!inDate(mission)) throw new Error("La misión está vencida");
     const existing = ExecutionService.activeForMission(userId, missionId);
     if (existing) return existing;
+    if (!MissionService.getAvailableMissions(userId).some((item) => item.id === missionId)) {
+      throw new Error("Esta misión no está disponible para tu perfil o establecimiento");
+    }
     const approvedVenues = VenueService.membershipsForUser(userId)
       .filter((m) => m.status === "approved")
       .map((m) => m.venueId);
@@ -310,6 +422,10 @@ export const ExecutionService = {
     return ex;
   },
   start(executionId: string) {
+    const execution = ExecutionService.byId(executionId);
+    if (!execution || !["accepted", "needs_fix"].includes(execution.status)) {
+      throw new Error("La ejecución no se puede iniciar en su estado actual");
+    }
     setState((s) => {
       s.executions = s.executions.map((e) =>
         e.id === executionId
@@ -324,6 +440,10 @@ export const ExecutionService = {
     evidences: Evidence[],
     loc?: { lat: number; lng: number },
   ) {
+    const execution = ExecutionService.byId(executionId);
+    if (!execution || !["accepted", "in_progress", "needs_fix"].includes(execution.status)) {
+      throw new Error("La ejecución no se puede editar en su estado actual");
+    }
     setState((s) => {
       s.executions = s.executions.map((e) =>
         e.id === executionId ? { ...e, answers, evidences, lat: loc?.lat, lng: loc?.lng } : e,
@@ -333,14 +453,44 @@ export const ExecutionService = {
   submit(executionId: string): Execution {
     const ex = ExecutionService.byId(executionId);
     if (!ex) throw new Error("Ejecución no encontrada");
+    if (!["accepted", "in_progress", "needs_fix"].includes(ex.status)) {
+      throw new Error("La ejecución ya fue enviada");
+    }
     const mission = MissionService.byId(ex.missionId);
     if (!mission) throw new Error("Misión no encontrada");
+    if (mission.status !== "active" || !inDate(mission)) {
+      throw new Error("La misión ya no está activa");
+    }
     // Validate required fields
     for (const f of mission.fields) {
       if (!f.required) continue;
       const v = ex.answers[f.id];
       if (v === undefined || v === null || v === "" || (Array.isArray(v) && v.length === 0)) {
         throw new Error(`Campo obligatorio: ${f.label}`);
+      }
+    }
+    for (const f of mission.fields) {
+      const value = ex.answers[f.id];
+      if (value === undefined || value === null || value === "") continue;
+      if (["number", "currency"].includes(f.type)) {
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+          throw new Error(`Valor numérico inválido: ${f.label}`);
+        }
+        if (f.min !== undefined && value < f.min) {
+          throw new Error(`${f.label} debe ser mínimo ${f.min}`);
+        }
+        if (f.max !== undefined && value > f.max) {
+          throw new Error(`${f.label} debe ser máximo ${f.max}`);
+        }
+      }
+      if (["dropdown", "single_choice"].includes(f.type) && !f.options?.includes(String(value))) {
+        throw new Error(`Opción inválida: ${f.label}`);
+      }
+      if (
+        f.type === "multi_choice" &&
+        (!Array.isArray(value) || value.some((item) => !f.options?.includes(String(item))))
+      ) {
+        throw new Error(`Opciones inválidas: ${f.label}`);
       }
     }
     if (mission.requiresPhoto && !ex.evidences.some((ev) => ev.type === "photo")) {
@@ -353,22 +503,14 @@ export const ExecutionService = {
       const venue = ex.venueId ? VenueService.byId(ex.venueId) : undefined;
       if (venue && mission.geoRadiusMeters) {
         const d = distanceMeters({ lat: ex.lat, lng: ex.lng }, venue);
-        if (d > mission.geoRadiusMeters * 20) {
-          // generous fallback so mock demo doesn't hard-fail; still logged
-          console.warn(`Ubicación lejos del establecimiento: ${Math.round(d)}m`);
+        if (d > mission.geoRadiusMeters) {
+          throw new Error(
+            `Debes estar a menos de ${mission.geoRadiusMeters} m del establecimiento (distancia actual: ${Math.round(d)} m)`,
+          );
         }
       }
     }
-    const updated: Execution = {
-      ...ex,
-      status: mission.requiresAudit ? "in_review" : "approved",
-      submittedAt: new Date().toISOString(),
-    };
-    setState((s) => {
-      s.executions = s.executions.map((e) => (e.id === executionId ? updated : e));
-    });
-    log(ex.userId, "execution_submit", "execution", ex.id);
-    if (updated.status === "approved") {
+    if (updatedStatus(mission) === "approved") {
       WalletService.credit(
         ex.userId,
         mission.rewardPoints,
@@ -377,6 +519,19 @@ export const ExecutionService = {
         ex.id,
       );
     }
+    const updated: Execution = {
+      ...ex,
+      status: updatedStatus(mission),
+      submittedAt: new Date().toISOString(),
+      pointsAwarded: mission.requiresAudit ? undefined : mission.rewardPoints,
+      auditorId: undefined,
+      reviewNotes: undefined,
+      rejectionReason: undefined,
+    };
+    setState((s) => {
+      s.executions = s.executions.map((e) => (e.id === executionId ? updated : e));
+    });
+    log(ex.userId, "execution_submit", "execution", ex.id);
     return updated;
   },
   review(
@@ -387,18 +542,16 @@ export const ExecutionService = {
   ): Execution {
     const ex = ExecutionService.byId(executionId);
     if (!ex) throw new Error("Ejecución no encontrada");
-    const mission = MissionService.byId(ex.missionId)!;
-    const updated: Execution = {
-      ...ex,
-      status: decision,
-      auditorId,
-      reviewNotes: notes,
-      rejectionReason: decision === "rejected" ? notes : undefined,
-    };
-    setState((s) => {
-      s.executions = s.executions.map((e) => (e.id === executionId ? updated : e));
-    });
-    log(auditorId, `execution_${decision}`, "execution", ex.id);
+    if (ex.status !== "in_review") throw new Error("La ejecución ya fue revisada");
+    const actor = UserService.byId(auditorId);
+    if (
+      !actor?.active ||
+      !actor.roles.some((role) => ["auditor", "platform_admin"].includes(role))
+    ) {
+      throw new Error("No tienes permiso para auditar ejecuciones");
+    }
+    const mission = MissionService.byId(ex.missionId);
+    if (!mission) throw new Error("Misión no encontrada");
     if (decision === "approved") {
       WalletService.credit(
         ex.userId,
@@ -408,6 +561,18 @@ export const ExecutionService = {
         ex.id,
       );
     }
+    const updated: Execution = {
+      ...ex,
+      status: decision,
+      auditorId,
+      reviewNotes: notes,
+      rejectionReason: decision === "rejected" ? notes : undefined,
+      pointsAwarded: decision === "approved" ? mission.rewardPoints : undefined,
+    };
+    setState((s) => {
+      s.executions = s.executions.map((e) => (e.id === executionId ? updated : e));
+    });
+    log(auditorId, `execution_${decision}`, "execution", ex.id);
     return updated;
   },
   pending(): Execution[] {
@@ -418,6 +583,7 @@ export const ExecutionService = {
 // -- Wallet --
 export const WalletService = {
   balance(userId: string): { available: number; pending: number; total: number; redeemed: number } {
+    reconcileExpiredRedemptions();
     const txs = getState().wallet.filter((t) => t.userId === userId);
     let available = 0;
     let pending = 0;
@@ -438,6 +604,7 @@ export const WalletService = {
     return { available, pending, total, redeemed };
   },
   transactions(userId: string): WalletTransaction[] {
+    reconcileExpiredRedemptions();
     return getState()
       .wallet.filter((t) => t.userId === userId)
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
@@ -449,6 +616,39 @@ export const WalletService = {
     missionId?: string,
     executionId?: string,
   ) {
+    if (!Number.isFinite(points) || points <= 0) throw new Error("Crédito de puntos inválido");
+    if (
+      executionId &&
+      getState().wallet.some(
+        (transaction) =>
+          transaction.executionId === executionId &&
+          transaction.kind === "mission_credit" &&
+          transaction.status !== "reversed",
+      )
+    ) {
+      return;
+    }
+    if (missionId) {
+      const state = getState();
+      const mission = state.missions.find((item) => item.id === missionId);
+      const campaign = mission
+        ? state.campaigns.find((item) => item.id === mission.campaignId)
+        : undefined;
+      if (!mission || !campaign) throw new Error("Campaña de la misión no encontrada");
+      const spent = state.wallet
+        .filter(
+          (transaction) =>
+            transaction.kind === "mission_credit" &&
+            transaction.status === "confirmed" &&
+            state.missions.some(
+              (item) => item.id === transaction.missionId && item.campaignId === campaign.id,
+            ),
+        )
+        .reduce((sum, transaction) => sum + transaction.points, 0);
+      if (spent + points > campaign.budgetPoints) {
+        throw new Error("La campaña no tiene presupuesto de puntos disponible");
+      }
+    }
     const tx: WalletTransaction = {
       id: uid("w"),
       userId,
@@ -465,6 +665,11 @@ export const WalletService = {
     });
   },
   adjust(userId: string, points: number, concept: string, actor: string) {
+    const actingUser = UserService.byId(actor);
+    if (!actingUser?.active || !actingUser.roles.includes("platform_admin")) {
+      throw new Error("No tienes permiso para ajustar saldos");
+    }
+    if (!Number.isFinite(points) || points === 0) throw new Error("Ajuste de puntos inválido");
     setState((s) => {
       s.wallet = [
         ...s.wallet,
@@ -486,6 +691,7 @@ export const WalletService = {
 // -- Rewards --
 export const RewardService = {
   list(): Reward[] {
+    reconcileExpiredRedemptions();
     return getState().rewards.filter((r) => r.active);
   },
   all(): Reward[] {
@@ -495,6 +701,11 @@ export const RewardService = {
     return getState().rewards.find((r) => r.id === id);
   },
   redeem(userId: string, rewardId: string): Redemption {
+    reconcileExpiredRedemptions();
+    const participant = UserService.byId(userId);
+    if (!participant?.active || !participant.roles.includes("participant")) {
+      throw new Error("Participante no encontrado o inactivo");
+    }
     let red: Redemption | null = null;
     setState((s) => {
       const r = s.rewards.find((reward) => reward.id === rewardId);
@@ -502,7 +713,9 @@ export const RewardService = {
       if (!r.merchantId) throw new Error("El beneficio no tiene un comercio autorizado");
       if (r.stock <= 0) throw new Error("Sin stock disponible");
       const available = s.wallet
-        .filter((transaction) => transaction.userId === userId && transaction.status !== "reversed")
+        .filter(
+          (transaction) => transaction.userId === userId && transaction.status === "confirmed",
+        )
         .reduce((balance, transaction) => balance + transaction.points, 0);
       if (available < r.pointsRequired) throw new Error("Saldo insuficiente");
       const now = new Date();
@@ -526,6 +739,7 @@ export const RewardService = {
           kind: "redemption",
           points: -r.pointsRequired,
           concept: `Reserva de redención: ${r.name}`,
+          redemptionId: red.id,
           createdAt: new Date().toISOString(),
           status: "confirmed",
         },
@@ -536,6 +750,7 @@ export const RewardService = {
     return red;
   },
   redemptions(userId?: string): Redemption[] {
+    reconcileExpiredRedemptions();
     const all = getState().redemptions;
     return userId ? all.filter((r) => r.userId === userId) : all;
   },
@@ -558,6 +773,7 @@ export const RewardService = {
     return token;
   },
   checkToken(token: string, actorUserId: string) {
+    reconcileExpiredRedemptions();
     const normalized = token.trim().toUpperCase();
     const redemption = getState().redemptions.find(
       (item) => item.token?.toUpperCase() === normalized,
@@ -567,7 +783,7 @@ export const RewardService = {
     const reward = RewardService.byId(redemption.rewardId);
     const participant = getState().users.find((user) => user.id === redemption.userId);
     const actor = getState().users.find((user) => user.id === actorUserId);
-    if (!reward || !participant || !actor) {
+    if (!reward || !participant?.active || !actor?.active) {
       return { valid: false as const, reason: "No fue posible verificar la redención" };
     }
     if (!actor.roles.some((role) => ["venue_admin", "platform_admin"].includes(role))) {
@@ -615,6 +831,7 @@ export const RewardService = {
     return { valid: true as const, redemption, reward, participant };
   },
   consumeToken(token: string, actorUserId: string): Redemption {
+    reconcileExpiredRedemptions();
     let updated: Redemption | null = null;
     setState((s) => {
       const normalized = token.trim().toUpperCase();
@@ -622,7 +839,7 @@ export const RewardService = {
       if (!redemption) throw new Error("Token no encontrado");
       const reward = s.rewards.find((item) => item.id === redemption.rewardId);
       const actor = s.users.find((item) => item.id === actorUserId);
-      if (!reward || !actor) throw new Error("No fue posible verificar la redención");
+      if (!reward || !actor?.active) throw new Error("No fue posible verificar la redención");
       if (!actor.roles.some((role) => ["venue_admin", "platform_admin"].includes(role))) {
         throw new Error("No tienes permiso para validar tokens");
       }
@@ -645,8 +862,9 @@ export const RewardService = {
       s.redemptions = s.redemptions.map((item) => (item.id === updated!.id ? updated! : item));
     });
     if (!updated) throw new Error("No se pudo aplicar el beneficio");
-    log(actorUserId, "redemption_delivered", "redemption", updated.id);
-    return updated;
+    const delivered = updated as Redemption;
+    log(actorUserId, "redemption_delivered", "redemption", delivered.id);
+    return delivered;
   },
 };
 

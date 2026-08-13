@@ -30,7 +30,9 @@ function MissionList() {
                     <div className="flex flex-wrap gap-1 mb-1">
                       <Badge variant="outline">{brand?.name}</Badge>
                       <Badge variant="secondary">{MISSION_TYPE_LABELS[m.type]}</Badge>
-                      <Badge variant={m.status === "active" ? "default" : "outline"}>{m.status}</Badge>
+                      <Badge variant={m.status === "active" ? "default" : "outline"}>
+                        {m.status}
+                      </Badge>
                     </div>
                     <div className="font-semibold truncate">{m.name}</div>
                     <div className="text-xs text-muted-foreground">

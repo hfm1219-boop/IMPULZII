@@ -15,7 +15,10 @@ function AdminDash() {
   const state = useLive(() => getState());
   const pending = state.executions.filter((e) => ["submitted", "in_review"].includes(e.status));
   const approvedThisWeek = state.executions.filter(
-    (e) => e.status === "approved" && e.submittedAt && Date.now() - new Date(e.submittedAt).getTime() < 7 * 86400000,
+    (e) =>
+      e.status === "approved" &&
+      e.submittedAt &&
+      Date.now() - new Date(e.submittedAt).getTime() < 7 * 86400000,
   );
   const activeMissions = state.missions.filter((m) => m.status === "active");
 
@@ -27,7 +30,11 @@ function AdminDash() {
       </header>
 
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-        <Kpi icon={Users} label="Participantes" value={state.users.filter((u) => u.roles.includes("participant")).length} />
+        <Kpi
+          icon={Users}
+          label="Participantes"
+          value={state.users.filter((u) => u.roles.includes("participant")).length}
+        />
         <Kpi icon={Store} label="Establecimientos" value={state.venues.length} />
         <Kpi icon={Target} label="Misiones activas" value={activeMissions.length} />
         <Kpi icon={ClipboardCheck} label="Por auditar" value={pending.length} accent />
@@ -36,7 +43,9 @@ function AdminDash() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold">Cola de auditoría</h2>
-          <Link to="/admin/executions" className="text-sm text-primary font-medium">Ver todo</Link>
+          <Link to="/admin/executions" className="text-sm text-primary font-medium">
+            Ver todo
+          </Link>
         </div>
         <div className="grid gap-2">
           {pending.slice(0, 5).map((e) => {
@@ -47,7 +56,10 @@ function AdminDash() {
                 <Card className="p-3 flex items-center justify-between">
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{m?.name}</div>
-                    <div className="text-xs text-muted-foreground truncate">{u?.fullName} · {e.submittedAt ? new Date(e.submittedAt).toLocaleString() : ""}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {u?.fullName} ·{" "}
+                      {e.submittedAt ? new Date(e.submittedAt).toLocaleString() : ""}
+                    </div>
                   </div>
                   <StatusBadge status={e.status} />
                 </Card>
@@ -66,14 +78,26 @@ function AdminDash() {
         <h2 className="font-semibold mb-3">Aprobadas esta semana</h2>
         <Card className="p-4">
           <p className="text-3xl font-black">{approvedThisWeek.length}</p>
-          <p className="text-xs text-muted-foreground">Ejecuciones validadas en los últimos 7 días</p>
+          <p className="text-xs text-muted-foreground">
+            Ejecuciones validadas en los últimos 7 días
+          </p>
         </Card>
       </section>
     </div>
   );
 }
 
-function Kpi({ icon: Icon, label, value, accent }: { icon: typeof Users; label: string; value: number; accent?: boolean }) {
+function Kpi({
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: typeof Users;
+  label: string;
+  value: number;
+  accent?: boolean;
+}) {
   return (
     <Card className={`p-4 ${accent ? "gradient-brand text-primary-foreground border-0" : ""}`}>
       <Icon className={`h-5 w-5 ${accent ? "opacity-90" : "text-muted-foreground"}`} />

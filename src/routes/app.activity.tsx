@@ -24,7 +24,10 @@ function Activity() {
     <div className="space-y-4">
       <h1 className="text-2xl font-black">Actividad</h1>
       {execs.length === 0 ? (
-        <EmptyState title="Aún no tienes ejecuciones" description="Acepta una misión desde la sección Misiones." />
+        <EmptyState
+          title="Aún no tienes ejecuciones"
+          description="Acepta una misión desde la sección Misiones."
+        />
       ) : (
         Object.entries(groups).map(([status, list]) => (
           <section key={status} className="space-y-2">

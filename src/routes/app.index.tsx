@@ -16,7 +16,9 @@ function Home() {
   const { user } = useAuth();
   const state = useLive(() => ({
     missions: user ? MissionService.getAvailableMissions(user.id) : [],
-    balance: user ? WalletService.balance(user.id) : { available: 0, pending: 0, total: 0, redeemed: 0 },
+    balance: user
+      ? WalletService.balance(user.id)
+      : { available: 0, pending: 0, total: 0, redeemed: 0 },
     execs: user ? ExecutionService.byUser(user.id) : [],
   }));
   if (!user) return null;
@@ -36,14 +38,25 @@ function Home() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-wider opacity-80">Saldo disponible</p>
-            <p className="text-3xl font-black mt-1">{state.balance.available.toLocaleString()} pts</p>
+            <p className="text-3xl font-black mt-1">
+              {state.balance.available.toLocaleString()} pts
+            </p>
           </div>
           <Award className="h-10 w-10 opacity-80" />
         </div>
         <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
-          <div><div className="opacity-70">Pendiente</div><div className="font-semibold">{state.balance.pending}</div></div>
-          <div><div className="opacity-70">Acumulado</div><div className="font-semibold">{state.balance.total}</div></div>
-          <div><div className="opacity-70">Redimido</div><div className="font-semibold">{state.balance.redeemed}</div></div>
+          <div>
+            <div className="opacity-70">Pendiente</div>
+            <div className="font-semibold">{state.balance.pending}</div>
+          </div>
+          <div>
+            <div className="opacity-70">Acumulado</div>
+            <div className="font-semibold">{state.balance.total}</div>
+          </div>
+          <div>
+            <div className="opacity-70">Redimido</div>
+            <div className="font-semibold">{state.balance.redeemed}</div>
+          </div>
         </div>
       </Card>
 
@@ -63,17 +76,25 @@ function Home() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold">Destacadas</h2>
-          <Link to="/app/missions" className="text-sm text-primary font-medium">Ver todas</Link>
+          <Link to="/app/missions" className="text-sm text-primary font-medium">
+            Ver todas
+          </Link>
         </div>
         {state.missions.length === 0 ? (
           <EmptyState
             title="No tienes misiones disponibles"
             description="Vincúlate a un establecimiento o revisa más tarde."
-            action={<Link to="/app/venues"><Button size="sm">Vincular establecimiento</Button></Link>}
+            action={
+              <Link to="/app/venues">
+                <Button size="sm">Vincular establecimiento</Button>
+              </Link>
+            }
           />
         ) : (
           <div className="grid gap-3">
-            {state.missions.slice(0, 3).map((m) => <MissionCard key={m.id} mission={m} />)}
+            {state.missions.slice(0, 3).map((m) => (
+              <MissionCard key={m.id} mission={m} />
+            ))}
           </div>
         )}
       </section>

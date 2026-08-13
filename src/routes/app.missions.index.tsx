@@ -43,7 +43,10 @@ function Missions() {
         </TabsList>
         <TabsContent value="available" className="mt-4 space-y-3">
           {data.available.length === 0 ? (
-            <EmptyState title="No hay misiones disponibles" description="Revisa que estés vinculado a un establecimiento habilitado." />
+            <EmptyState
+              title="No hay misiones disponibles"
+              description="Revisa que estés vinculado a un establecimiento habilitado."
+            />
           ) : (
             data.available.map((m) => <MissionCard key={m.id} mission={m} />)
           )}

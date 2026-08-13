@@ -30,12 +30,19 @@ function Campaigns() {
               <h3 className="mt-2 font-bold text-lg">{c.name}</h3>
               <p className="text-sm text-muted-foreground line-clamp-2">{c.description}</p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-muted px-2 py-1">{c.budgetPoints.toLocaleString()} pts presupuesto</span>
+                <span className="rounded-full bg-muted px-2 py-1">
+                  {c.budgetPoints.toLocaleString()} pts presupuesto
+                </span>
                 <span className="rounded-full bg-muted px-2 py-1">{missions.length} misiones</span>
               </div>
               <div className="mt-3 space-y-1">
                 {missions.map((m) => (
-                  <Link key={m.id} to="/admin/missions/$id" params={{ id: m.id }} className="block text-sm text-primary hover:underline">
+                  <Link
+                    key={m.id}
+                    to="/admin/missions/$id"
+                    params={{ id: m.id }}
+                    className="block text-sm text-primary hover:underline"
+                  >
                     → {m.name}
                   </Link>
                 ))}

@@ -86,12 +86,13 @@ function load() {
   }
 }
 
-function persist() {
-  if (typeof window === "undefined") return;
+function persist(): boolean {
+  if (typeof window === "undefined") return true;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(state));
+    return true;
   } catch {
-    // ignore
+    return false;
   }
 }
 
@@ -102,10 +103,14 @@ export function getState(): Snapshot {
 
 export function setState(mut: (s: Snapshot) => Snapshot | void) {
   load();
+  const previous = state;
   const draft = { ...state };
   const res = mut(draft);
   state = (res as Snapshot | undefined) ?? draft;
-  persist();
+  if (!persist()) {
+    state = previous;
+    throw new Error("No fue posible guardar los cambios en este navegador");
+  }
   listeners.forEach((l) => l());
 }
 

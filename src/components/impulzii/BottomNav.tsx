@@ -26,8 +26,7 @@ export function BottomNav() {
       </div>
       <ul className="flex md:flex-col justify-around md:justify-start md:gap-1 md:px-2">
         {items.map((it) => {
-          const active =
-            it.to === "/app" ? path === "/app" : path.startsWith(it.to);
+          const active = it.to === "/app" ? path === "/app" : path.startsWith(it.to);
           const Icon = it.icon;
           return (
             <li key={it.to} className="flex-1 md:flex-none">
