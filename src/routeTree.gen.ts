@@ -18,11 +18,13 @@ import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdminExecutionsRouteImport } from './routes/admin.executions'
 import { Route as AdminMissionsRouteImport } from './routes/admin.missions'
 import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
+import { Route as AdminRedemptionsRouteImport } from './routes/admin.redemptions'
 import { Route as AdminVenuesRouteImport } from './routes/admin.venues'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppActivityRouteImport } from './routes/app.activity'
 import { Route as AppMissionsRouteImport } from './routes/app.missions'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppRewardsRouteImport } from './routes/app.rewards'
 import { Route as AppVenuesRouteImport } from './routes/app.venues'
 import { Route as AppWalletRouteImport } from './routes/app.wallet'
 import { Route as AdminExecutionsIndexRouteImport } from './routes/admin.executions.index'
@@ -78,6 +80,11 @@ const AdminParticipantsRoute = AdminParticipantsRouteImport.update({
   path: '/participants',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRedemptionsRoute = AdminRedemptionsRouteImport.update({
+  id: '/redemptions',
+  path: '/redemptions',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminVenuesRoute = AdminVenuesRouteImport.update({
   id: '/venues',
   path: '/venues',
@@ -101,6 +108,11 @@ const AppMissionsRoute = AppMissionsRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRewardsRoute = AppRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
   getParentRoute: () => AppRoute,
 } as any)
 const AppVenuesRoute = AppVenuesRouteImport.update({
@@ -158,10 +170,12 @@ export interface FileRoutesByFullPath {
   '/admin/executions': typeof AdminExecutionsRouteWithChildren
   '/admin/missions': typeof AdminMissionsRouteWithChildren
   '/admin/participants': typeof AdminParticipantsRoute
+  '/admin/redemptions': typeof AdminRedemptionsRoute
   '/admin/venues': typeof AdminVenuesRoute
   '/app/activity': typeof AppActivityRoute
   '/app/missions': typeof AppMissionsRouteWithChildren
   '/app/profile': typeof AppProfileRoute
+  '/app/rewards': typeof AppRewardsRoute
   '/app/venues': typeof AppVenuesRoute
   '/app/wallet': typeof AppWalletRoute
   '/admin/': typeof AdminIndexRoute
@@ -179,9 +193,11 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/participants': typeof AdminParticipantsRoute
+  '/admin/redemptions': typeof AdminRedemptionsRoute
   '/admin/venues': typeof AdminVenuesRoute
   '/app/activity': typeof AppActivityRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/rewards': typeof AppRewardsRoute
   '/app/venues': typeof AppVenuesRoute
   '/app/wallet': typeof AppWalletRoute
   '/admin': typeof AdminIndexRoute
@@ -204,10 +220,12 @@ export interface FileRoutesById {
   '/admin/executions': typeof AdminExecutionsRouteWithChildren
   '/admin/missions': typeof AdminMissionsRouteWithChildren
   '/admin/participants': typeof AdminParticipantsRoute
+  '/admin/redemptions': typeof AdminRedemptionsRoute
   '/admin/venues': typeof AdminVenuesRoute
   '/app/activity': typeof AppActivityRoute
   '/app/missions': typeof AppMissionsRouteWithChildren
   '/app/profile': typeof AppProfileRoute
+  '/app/rewards': typeof AppRewardsRoute
   '/app/venues': typeof AppVenuesRoute
   '/app/wallet': typeof AppWalletRoute
   '/admin/': typeof AdminIndexRoute
@@ -231,10 +249,12 @@ export interface FileRouteTypes {
     | '/admin/executions'
     | '/admin/missions'
     | '/admin/participants'
+    | '/admin/redemptions'
     | '/admin/venues'
     | '/app/activity'
     | '/app/missions'
     | '/app/profile'
+    | '/app/rewards'
     | '/app/venues'
     | '/app/wallet'
     | '/admin/'
@@ -252,9 +272,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin/campaigns'
     | '/admin/participants'
+    | '/admin/redemptions'
     | '/admin/venues'
     | '/app/activity'
     | '/app/profile'
+    | '/app/rewards'
     | '/app/venues'
     | '/app/wallet'
     | '/admin'
@@ -276,10 +298,12 @@ export interface FileRouteTypes {
     | '/admin/executions'
     | '/admin/missions'
     | '/admin/participants'
+    | '/admin/redemptions'
     | '/admin/venues'
     | '/app/activity'
     | '/app/missions'
     | '/app/profile'
+    | '/app/rewards'
     | '/app/venues'
     | '/app/wallet'
     | '/admin/'
@@ -365,6 +389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminParticipantsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/redemptions': {
+      id: '/admin/redemptions'
+      path: '/redemptions'
+      fullPath: '/admin/redemptions'
+      preLoaderRoute: typeof AdminRedemptionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/venues': {
       id: '/admin/venues'
       path: '/venues'
@@ -398,6 +429,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/app/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/rewards': {
+      id: '/app/rewards'
+      path: '/rewards'
+      fullPath: '/app/rewards'
+      preLoaderRoute: typeof AppRewardsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/venues': {
@@ -499,6 +537,7 @@ interface AdminRouteChildren {
   AdminExecutionsRoute: typeof AdminExecutionsRouteWithChildren
   AdminMissionsRoute: typeof AdminMissionsRouteWithChildren
   AdminParticipantsRoute: typeof AdminParticipantsRoute
+  AdminRedemptionsRoute: typeof AdminRedemptionsRoute
   AdminVenuesRoute: typeof AdminVenuesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -508,6 +547,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminExecutionsRoute: AdminExecutionsRouteWithChildren,
   AdminMissionsRoute: AdminMissionsRouteWithChildren,
   AdminParticipantsRoute: AdminParticipantsRoute,
+  AdminRedemptionsRoute: AdminRedemptionsRoute,
   AdminVenuesRoute: AdminVenuesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -544,6 +584,7 @@ interface AppRouteChildren {
   AppActivityRoute: typeof AppActivityRoute
   AppMissionsRoute: typeof AppMissionsRouteWithChildren
   AppProfileRoute: typeof AppProfileRoute
+  AppRewardsRoute: typeof AppRewardsRoute
   AppVenuesRoute: typeof AppVenuesRoute
   AppWalletRoute: typeof AppWalletRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -553,6 +594,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppActivityRoute: AppActivityRoute,
   AppMissionsRoute: AppMissionsRouteWithChildren,
   AppProfileRoute: AppProfileRoute,
+  AppRewardsRoute: AppRewardsRoute,
   AppVenuesRoute: AppVenuesRoute,
   AppWalletRoute: AppWalletRoute,
   AppIndexRoute: AppIndexRoute,

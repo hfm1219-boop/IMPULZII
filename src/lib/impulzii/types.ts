@@ -40,6 +40,7 @@ export interface User {
   verification: VerificationStatus;
   active: boolean;
   createdAt: string;
+  merchantIds?: string[];
 }
 
 export type VenueType =
@@ -99,12 +100,7 @@ export interface Brand {
 }
 
 export type CampaignStatus =
-  | "draft"
-  | "scheduled"
-  | "published"
-  | "paused"
-  | "finished"
-  | "cancelled";
+  "draft" | "scheduled" | "published" | "paused" | "finished" | "cancelled";
 
 export interface Campaign {
   id: string;
@@ -256,11 +252,7 @@ export interface Execution {
 }
 
 export type WalletTxKind =
-  | "mission_credit"
-  | "adjustment"
-  | "reversal"
-  | "redemption"
-  | "expiration";
+  "mission_credit" | "adjustment" | "reversal" | "redemption" | "expiration";
 
 export interface WalletTransaction {
   id: string;
@@ -282,14 +274,15 @@ export interface Reward {
   pointsRequired: number;
   stock: number;
   active: boolean;
+  merchantName?: string;
+  city?: string;
+  tripadvisorRank?: number;
+  tripadvisorRating?: number;
+  category?: string;
+  merchantId?: string;
 }
 
-export type RedemptionStatus =
-  | "requested"
-  | "approved"
-  | "delivered"
-  | "rejected"
-  | "cancelled";
+export type RedemptionStatus = "requested" | "approved" | "delivered" | "rejected" | "cancelled";
 
 export interface Redemption {
   id: string;
@@ -298,6 +291,10 @@ export interface Redemption {
   points: number;
   status: RedemptionStatus;
   createdAt: string;
+  token: string;
+  expiresAt: string;
+  redeemedAt?: string;
+  validatedByUserId?: string;
 }
 
 export interface AuditLog {
