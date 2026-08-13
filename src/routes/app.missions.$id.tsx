@@ -1,4 +1,11 @@
-import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useNavigate,
+  useRouterState,
+  notFound,
+} from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +28,15 @@ export const Route = createFileRoute("/app/missions/$id")({
     if (!m) throw notFound();
     return { missionId: m.id };
   },
-  component: MissionDetail,
+  component: MissionRoute,
 });
+
+function MissionRoute() {
+  const isExecuting = useRouterState({
+    select: (state) => state.location.pathname.endsWith("/execute"),
+  });
+  return isExecuting ? <Outlet /> : <MissionDetail />;
+}
 
 function MissionDetail() {
   const { id } = Route.useParams();
