@@ -141,7 +141,7 @@ export const AuthService = {
       docNumber: normalizedDocument,
       id: uid("u"),
       roles: ["participant"],
-      verification: "pending",
+      verification: "verified",
       active: true,
       createdAt: new Date().toISOString(),
     };

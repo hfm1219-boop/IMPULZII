@@ -123,12 +123,10 @@ function MissionDetail() {
 
       <div className="sticky bottom-20 md:bottom-4 z-20">
         {data.exec ? (
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={() => navigate({ to: "/app/missions/$id/execute", params: { id: m.id } })}
-          >
-            Continuar ejecución
+          <Button asChild className="w-full" size="lg">
+            <Link to="/app/missions/$id/execute" params={{ id: m.id }}>
+              Continuar ejecución
+            </Link>
           </Button>
         ) : lastExec && ["in_review", "submitted", "approved"].includes(lastExec.status) ? (
           <Card className="p-3 flex items-center justify-between">

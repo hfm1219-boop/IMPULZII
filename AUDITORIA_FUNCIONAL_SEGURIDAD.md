@@ -12,31 +12,31 @@ Fecha: 13 de agosto de 2026
 
 ## Flujos comprobados
 
-| Flujo | Resultado |
-| --- | --- |
-| Portada → ingreso/registro | Correcto |
-| Logo → portada pública | Correcto |
-| Registro duplicado por correo/documento | Bloqueado |
-| Usuario inactivo → sesión | Bloqueado |
-| Vinculación a establecimiento activo | Correcto |
-| Vinculación a usuario/establecimiento inactivo | Bloqueada |
-| Elegibilidad por campaña, misión, ciudad, perfil, establecimiento y verificación | Validada |
-| Frecuencia y cupos por participante/total | Validados |
-| Aceptar → iniciar → autoguardar → enviar | Correcto |
-| Retomar borrador o corrección | Correcto |
-| Editar o reenviar ejecución cerrada | Bloqueado |
-| Campos obligatorios, rangos y opciones | Validados |
-| Foto y geolocalización | Validadas |
-| Auditor no autorizado | Bloqueado |
-| Aprobación repetida / doble crédito | Bloqueada |
-| Presupuesto de campaña | Validado |
-| Saldo disponible vs. pendiente | Corregido |
-| Reserva de recompensa e inventario | Atómica en la demo |
-| Token de otro comercio | Bloqueado |
-| Token vencido | Cancelado; saldo e inventario restaurados |
-| Token reutilizado | Bloqueado |
-| Navegación administrativa móvil | Corregida |
-| Ruta `/admin/rewards` | Implementada |
+| Flujo                                                                            | Resultado                                 |
+| -------------------------------------------------------------------------------- | ----------------------------------------- |
+| Portada → ingreso/registro                                                       | Correcto                                  |
+| Logo → portada pública                                                           | Correcto                                  |
+| Registro duplicado por correo/documento                                          | Bloqueado                                 |
+| Usuario inactivo → sesión                                                        | Bloqueado                                 |
+| Vinculación a establecimiento activo                                             | Correcto                                  |
+| Vinculación a usuario/establecimiento inactivo                                   | Bloqueada                                 |
+| Elegibilidad por campaña, misión, ciudad, perfil, establecimiento y verificación | Validada                                  |
+| Frecuencia y cupos por participante/total                                        | Validados                                 |
+| Aceptar → iniciar → autoguardar → enviar                                         | Correcto                                  |
+| Retomar borrador o corrección                                                    | Correcto                                  |
+| Editar o reenviar ejecución cerrada                                              | Bloqueado                                 |
+| Campos obligatorios, rangos y opciones                                           | Validados                                 |
+| Foto y geolocalización                                                           | Validadas                                 |
+| Auditor no autorizado                                                            | Bloqueado                                 |
+| Aprobación repetida / doble crédito                                              | Bloqueada                                 |
+| Presupuesto de campaña                                                           | Validado                                  |
+| Saldo disponible vs. pendiente                                                   | Corregido                                 |
+| Reserva de recompensa e inventario                                               | Atómica en la demo                        |
+| Token de otro comercio                                                           | Bloqueado                                 |
+| Token vencido                                                                    | Cancelado; saldo e inventario restaurados |
+| Token reutilizado                                                                | Bloqueado                                 |
+| Navegación administrativa móvil                                                  | Corregida                                 |
+| Ruta `/admin/rewards`                                                            | Implementada                              |
 
 ## Correcciones de seguridad aplicadas
 
@@ -60,7 +60,7 @@ Para producción serían obligatorios un backend autoritativo, autenticación re
 
 ## Verificación técnica
 
-- `npm run audit:functional`: 18 controles funcionales y antifraude superados.
+- `npm run audit:functional`: 26 controles funcionales, por rol y antifraude superados.
 - `npx tsc --noEmit`: sin errores.
 - `npm run lint`: sin errores; permanecen 8 advertencias de Fast Refresh en componentes compartidos.
 - `npm run build`: compilación cliente, SSR y Cloudflare completada.

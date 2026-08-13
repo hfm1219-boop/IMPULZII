@@ -68,7 +68,13 @@ function load() {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<Snapshot>;
       state = { ...initial(), ...parsed };
-      const storedUsers = parsed.users ?? [];
+      const storedUsers = (parsed.users ?? []).map((user) =>
+        !seedUsers.some((seedUser) => seedUser.id === user.id) &&
+        user.roles.includes("participant") &&
+        user.verification === "pending"
+          ? { ...user, verification: "verified" as const }
+          : user,
+      );
       state.users = [
         ...storedUsers,
         ...seedUsers.filter((seedUser) => !storedUsers.some((stored) => stored.id === seedUser.id)),

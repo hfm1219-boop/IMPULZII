@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { DynamicField } from "@/components/impulzii/DynamicField";
-import { MissionService, ExecutionService } from "@/lib/impulzii/services";
+import { MissionService, ExecutionService, VenueService } from "@/lib/impulzii/services";
 import { useAuth } from "@/lib/impulzii/auth-context";
 import type { Evidence } from "@/lib/impulzii/types";
 import { ArrowLeft, MapPin, Send } from "lucide-react";
@@ -26,6 +26,8 @@ function ExecutePage() {
   const [execId, setExecId] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [initializationError, setInitializationError] = useState<string | null>(null);
+  const execution = execId ? ExecutionService.byId(execId) : undefined;
+  const demoVenue = execution?.venueId ? VenueService.byId(execution.venueId) : undefined;
 
   useEffect(() => {
     if (!user || !mission) return;
@@ -166,7 +168,7 @@ function ExecutePage() {
 
       {mission.requiresGeo && (
         <Card className="p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-semibold flex items-center gap-2">
                 <MapPin className="h-4 w-4" /> Ubicación
@@ -179,15 +181,36 @@ function ExecutePage() {
                 <p className="text-xs text-muted-foreground mt-1">Requerimos tu ubicación GPS.</p>
               )}
             </div>
-            <Button
-              type="button"
-              variant={loc ? "outline" : "default"}
-              onClick={requestLocation}
-              disabled={locStatus === "loading"}
-            >
-              {loc ? "Actualizar" : locStatus === "loading" ? "..." : "Obtener"}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant={loc ? "outline" : "default"}
+                onClick={requestLocation}
+                disabled={locStatus === "loading"}
+              >
+                {loc ? "Actualizar GPS" : locStatus === "loading" ? "..." : "Obtener GPS"}
+              </Button>
+              {demoVenue && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setLoc({ lat: demoVenue.lat, lng: demoVenue.lng });
+                    setLocStatus("ok");
+                    toast.success(`Ubicación demo: ${demoVenue.commercialName}`);
+                  }}
+                >
+                  Usar ubicación demo
+                </Button>
+              )}
+            </div>
           </div>
+          {demoVenue && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              La ubicación demo permite probar este flujo localmente sin estar físicamente en{" "}
+              {demoVenue.commercialName}.
+            </p>
+          )}
         </Card>
       )}
 

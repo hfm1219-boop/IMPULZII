@@ -35,10 +35,47 @@ try {
   assert.equal(AuthService.loginAs("u_demo"), null, "Un usuario inactivo no debe iniciar sesión");
 
   resetStore();
+  const registered = AuthService.register({
+    fullName: "Participante Nuevo",
+    docType: "CC",
+    docNumber: "9999999999",
+    email: "nuevo@impulzii.test",
+    phone: "3000000000",
+    city: "Barranquilla",
+    profileKind: "bartender",
+  });
+  assert.equal(registered.verification, "verified", "El registro demo debe quedar habilitado");
+  expectError(
+    () => AuthService.register({ ...registered, id: undefined, roles: undefined }),
+    "correo|documento",
+  );
+
+  resetStore();
   const available = MissionService.getAvailableMissions("u_demo");
   assert.ok(available.length > 0, "El participante demo debe tener misiones disponibles");
   const training = available.find((mission) => mission.id === "mi_patrimonio_training");
   assert.ok(training, "La capacitación demo debe estar disponible");
+  const geoMission = available.find((mission) => mission.id === "mi_astutto_sell");
+  assert.ok(geoMission, "La misión con ubicación debe estar disponible");
+
+  const geoExecution = ExecutionService.accept("u_demo", geoMission.id);
+  ExecutionService.start(geoExecution.id);
+  const venue = VenueService.byId(geoExecution.venueId);
+  assert.ok(venue, "La misión debe estar vinculada a un establecimiento");
+  ExecutionService.saveDraft(
+    geoExecution.id,
+    { f1: 5, f2: "FAC-DEMO", f3: "data:image/png;base64,AAAA" },
+    [
+      {
+        id: "ev_demo_geo",
+        type: "photo",
+        fileDataUrl: "data:image/png;base64,AAAA",
+        createdAt: new Date().toISOString(),
+      },
+    ],
+    { lat: venue.lat, lng: venue.lng },
+  );
+  assert.equal(ExecutionService.submit(geoExecution.id).status, "in_review");
 
   const execution = ExecutionService.accept("u_demo", training.id);
   ExecutionService.start(execution.id);
@@ -82,6 +119,7 @@ try {
   assert.equal(RewardService.byId("r_ctg_buena_vida").stock, initialStock - 1);
   assert.equal(RewardService.checkToken(redemption.token, "u_venueadmin").valid, false);
   assert.equal(RewardService.checkToken(redemption.token, "u_buena_vida_admin").valid, true);
+  assert.equal(RewardService.checkToken(redemption.token, "u_admin").valid, true);
   RewardService.consumeToken(redemption.token, "u_buena_vida_admin");
   expectError(
     () => RewardService.consumeToken(redemption.token, "u_buena_vida_admin"),
@@ -120,7 +158,11 @@ try {
   });
   assert.equal(WalletService.balance("u_demo").available, beforePending);
 
-  console.log("Auditoría funcional automatizada: 18 controles superados.");
+  assert.ok(AuthService.loginAs("u_auditor")?.roles.includes("auditor"));
+  assert.ok(AuthService.loginAs("u_buena_vida_admin")?.roles.includes("venue_admin"));
+  assert.ok(AuthService.loginAs("u_admin")?.roles.includes("platform_admin"));
+
+  console.log("Auditoría funcional automatizada: 26 controles superados.");
 } finally {
   await server.close();
 }
