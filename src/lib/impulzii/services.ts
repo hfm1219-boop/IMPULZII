@@ -41,9 +41,7 @@ function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: 
   const dLng = toRad(b.lng - a.lng);
   const lat1 = toRad(a.lat);
   const lat2 = toRad(b.lat);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+  const h = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
@@ -63,9 +61,7 @@ export const AuthService = {
     return u;
   },
   loginByEmail(email: string): User | null {
-    const u = getState().users.find(
-      (x) => x.email.toLowerCase() === email.toLowerCase(),
-    );
+    const u = getState().users.find((x) => x.email.toLowerCase() === email.toLowerCase());
     if (!u) return null;
     setState((s) => {
       s.currentUserId = u.id;
@@ -109,9 +105,7 @@ export const UserService = {
   },
   toggleBlock(id: string) {
     setState((s) => {
-      s.users = s.users.map((u) =>
-        u.id === id ? { ...u, active: !u.active } : u,
-      );
+      s.users = s.users.map((u) => (u.id === id ? { ...u, active: !u.active } : u));
     });
   },
 };
@@ -181,9 +175,7 @@ export const VenueService = {
     return m;
   },
   requestByCode(userId: string, code: string): VenueMembership | null {
-    const v = getState().venues.find(
-      (x) => x.joinCode.toLowerCase() === code.trim().toLowerCase(),
-    );
+    const v = getState().venues.find((x) => x.joinCode.toLowerCase() === code.trim().toLowerCase());
     if (!v) return null;
     return VenueService.requestMembership(userId, v.id);
   },
@@ -256,19 +248,11 @@ export const MissionService = {
       const campaign = s.campaigns.find((c) => c.id === m.campaignId);
       if (!campaign || campaign.status !== "published") return false;
       if (m.targetCities.length && !m.targetCities.includes(user.city)) return false;
-      if (
-        m.targetProfileKinds.length &&
-        !m.targetProfileKinds.includes(user.profileKind)
-      )
+      if (m.targetProfileKinds.length && !m.targetProfileKinds.includes(user.profileKind))
         return false;
-      if (
-        m.targetVenueIds.length &&
-        !m.targetVenueIds.some((v) => approvedVenues.includes(v))
-      )
+      if (m.targetVenueIds.length && !m.targetVenueIds.some((v) => approvedVenues.includes(v)))
         return false;
-      const userExecs = s.executions.filter(
-        (e) => e.userId === userId && e.missionId === m.id,
-      );
+      const userExecs = s.executions.filter((e) => e.userId === userId && e.missionId === m.id);
       if (userExecs.length >= m.perUserQuota) return false;
       const totalNonRejected = s.executions.filter(
         (e) => e.missionId === m.id && e.status !== "rejected",
@@ -334,12 +318,15 @@ export const ExecutionService = {
       );
     });
   },
-  saveDraft(executionId: string, answers: Record<string, unknown>, evidences: Evidence[], loc?: { lat: number; lng: number }) {
+  saveDraft(
+    executionId: string,
+    answers: Record<string, unknown>,
+    evidences: Evidence[],
+    loc?: { lat: number; lng: number },
+  ) {
     setState((s) => {
       s.executions = s.executions.map((e) =>
-        e.id === executionId
-          ? { ...e, answers, evidences, lat: loc?.lat, lng: loc?.lng }
-          : e,
+        e.id === executionId ? { ...e, answers, evidences, lat: loc?.lat, lng: loc?.lng } : e,
       );
     });
   },
@@ -382,7 +369,13 @@ export const ExecutionService = {
     });
     log(ex.userId, "execution_submit", "execution", ex.id);
     if (updated.status === "approved") {
-      WalletService.credit(ex.userId, mission.rewardPoints, `Misión: ${mission.name}`, mission.id, ex.id);
+      WalletService.credit(
+        ex.userId,
+        mission.rewardPoints,
+        `Misión: ${mission.name}`,
+        mission.id,
+        ex.id,
+      );
     }
     return updated;
   },
@@ -407,7 +400,13 @@ export const ExecutionService = {
     });
     log(auditorId, `execution_${decision}`, "execution", ex.id);
     if (decision === "approved") {
-      WalletService.credit(ex.userId, mission.rewardPoints, `Misión: ${mission.name}`, mission.id, ex.id);
+      WalletService.credit(
+        ex.userId,
+        mission.rewardPoints,
+        `Misión: ${mission.name}`,
+        mission.id,
+        ex.id,
+      );
     }
     return updated;
   },
@@ -443,7 +442,13 @@ export const WalletService = {
       .wallet.filter((t) => t.userId === userId)
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   },
-  credit(userId: string, points: number, concept: string, missionId?: string, executionId?: string) {
+  credit(
+    userId: string,
+    points: number,
+    concept: string,
+    missionId?: string,
+    executionId?: string,
+  ) {
     const tx: WalletTransaction = {
       id: uid("w"),
       userId,
@@ -490,24 +495,29 @@ export const RewardService = {
     return getState().rewards.find((r) => r.id === id);
   },
   redeem(userId: string, rewardId: string): Redemption {
-    const r = RewardService.byId(rewardId);
-    if (!r) throw new Error("Recompensa no encontrada");
-    if (r.stock <= 0) throw new Error("Sin stock disponible");
-    const bal = WalletService.balance(userId);
-    if (bal.available < r.pointsRequired) throw new Error("Saldo insuficiente");
-    const red: Redemption = {
-      id: uid("rd"),
-      userId,
-      rewardId,
-      points: r.pointsRequired,
-      status: "requested",
-      createdAt: new Date().toISOString(),
-    };
+    let red: Redemption | null = null;
     setState((s) => {
+      const r = s.rewards.find((reward) => reward.id === rewardId);
+      if (!r || !r.active) throw new Error("Recompensa no encontrada");
+      if (!r.merchantId) throw new Error("El beneficio no tiene un comercio autorizado");
+      if (r.stock <= 0) throw new Error("Sin stock disponible");
+      const available = s.wallet
+        .filter((transaction) => transaction.userId === userId && transaction.status !== "reversed")
+        .reduce((balance, transaction) => balance + transaction.points, 0);
+      if (available < r.pointsRequired) throw new Error("Saldo insuficiente");
+      const now = new Date();
+      red = {
+        id: uid("rd"),
+        userId,
+        rewardId,
+        points: r.pointsRequired,
+        status: "requested",
+        createdAt: now.toISOString(),
+        token: RewardService.createToken(),
+        expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+      };
       s.redemptions = [...s.redemptions, red];
-      s.rewards = s.rewards.map((x) =>
-        x.id === rewardId ? { ...x, stock: x.stock - 1 } : x,
-      );
+      s.rewards = s.rewards.map((x) => (x.id === rewardId ? { ...x, stock: x.stock - 1 } : x));
       s.wallet = [
         ...s.wallet,
         {
@@ -515,18 +525,128 @@ export const RewardService = {
           userId,
           kind: "redemption",
           points: -r.pointsRequired,
-          concept: `Redención: ${r.name}`,
+          concept: `Reserva de redención: ${r.name}`,
           createdAt: new Date().toISOString(),
           status: "confirmed",
         },
       ];
     });
     log(userId, "redemption_request", "reward", rewardId);
+    if (!red) throw new Error("No se pudo crear la redención");
     return red;
   },
   redemptions(userId?: string): Redemption[] {
     const all = getState().redemptions;
     return userId ? all.filter((r) => r.userId === userId) : all;
+  },
+  createToken(): string {
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let token = "";
+    const secureRandom = (max: number) => {
+      if (!globalThis.crypto?.getRandomValues) {
+        throw new Error("Generador criptográfico no disponible");
+      }
+      const value = new Uint32Array(1);
+      globalThis.crypto.getRandomValues(value);
+      return value[0] % max;
+    };
+    do {
+      const block = () =>
+        Array.from({ length: 4 }, () => alphabet[secureRandom(alphabet.length)]).join("");
+      token = `${block()}-${block()}-${block()}`;
+    } while (getState().redemptions.some((redemption) => redemption.token === token));
+    return token;
+  },
+  checkToken(token: string, actorUserId: string) {
+    const normalized = token.trim().toUpperCase();
+    const redemption = getState().redemptions.find(
+      (item) => item.token?.toUpperCase() === normalized,
+    );
+    if (!redemption) return { valid: false as const, reason: "Token no encontrado" };
+
+    const reward = RewardService.byId(redemption.rewardId);
+    const participant = getState().users.find((user) => user.id === redemption.userId);
+    const actor = getState().users.find((user) => user.id === actorUserId);
+    if (!reward || !participant || !actor) {
+      return { valid: false as const, reason: "No fue posible verificar la redención" };
+    }
+    if (!actor.roles.some((role) => ["venue_admin", "platform_admin"].includes(role))) {
+      return { valid: false as const, reason: "No tienes permiso para validar tokens" };
+    }
+    if (
+      !actor.roles.includes("platform_admin") &&
+      (!reward.merchantId || !actor.merchantIds?.includes(reward.merchantId))
+    ) {
+      return {
+        valid: false as const,
+        reason: "El token pertenece a otro establecimiento",
+        redemption,
+        reward,
+        participant,
+      };
+    }
+    if (redemption.status === "delivered") {
+      return {
+        valid: false as const,
+        reason: "Este token ya fue utilizado",
+        redemption,
+        reward,
+        participant,
+      };
+    }
+    if (["rejected", "cancelled"].includes(redemption.status)) {
+      return {
+        valid: false as const,
+        reason: "Esta redención fue cancelada",
+        redemption,
+        reward,
+        participant,
+      };
+    }
+    if (new Date(redemption.expiresAt).getTime() <= Date.now()) {
+      return {
+        valid: false as const,
+        reason: "El token está vencido",
+        redemption,
+        reward,
+        participant,
+      };
+    }
+    return { valid: true as const, redemption, reward, participant };
+  },
+  consumeToken(token: string, actorUserId: string): Redemption {
+    let updated: Redemption | null = null;
+    setState((s) => {
+      const normalized = token.trim().toUpperCase();
+      const redemption = s.redemptions.find((item) => item.token?.toUpperCase() === normalized);
+      if (!redemption) throw new Error("Token no encontrado");
+      const reward = s.rewards.find((item) => item.id === redemption.rewardId);
+      const actor = s.users.find((item) => item.id === actorUserId);
+      if (!reward || !actor) throw new Error("No fue posible verificar la redención");
+      if (!actor.roles.some((role) => ["venue_admin", "platform_admin"].includes(role))) {
+        throw new Error("No tienes permiso para validar tokens");
+      }
+      if (
+        !actor.roles.includes("platform_admin") &&
+        (!reward.merchantId || !actor.merchantIds?.includes(reward.merchantId))
+      ) {
+        throw new Error("El token pertenece a otro establecimiento");
+      }
+      if (redemption.status === "delivered") throw new Error("Este token ya fue utilizado");
+      if (redemption.status !== "requested") throw new Error("Esta redención no está activa");
+      if (new Date(redemption.expiresAt).getTime() <= Date.now())
+        throw new Error("El token está vencido");
+      updated = {
+        ...redemption,
+        status: "delivered",
+        redeemedAt: new Date().toISOString(),
+        validatedByUserId: actorUserId,
+      };
+      s.redemptions = s.redemptions.map((item) => (item.id === updated!.id ? updated! : item));
+    });
+    if (!updated) throw new Error("No se pudo aplicar el beneficio");
+    log(actorUserId, "redemption_delivered", "redemption", updated.id);
+    return updated;
   },
 };
 

@@ -59,10 +59,7 @@ function AuthPage() {
                 onDone={(role) => {
                   refresh();
                   navigate({
-                    to:
-                      role === "participant"
-                        ? "/app"
-                        : "/admin",
+                    to: role === "participant" ? "/app" : "/admin",
                   });
                 }}
               />
@@ -81,8 +78,10 @@ function AuthPage() {
         <div className="mt-6 text-xs text-muted-foreground text-center">
           <p className="mb-2 font-semibold">Cuentas demo (MVP):</p>
           <div className="grid grid-cols-2 gap-2">
-            {getState().users
-              .filter((u) => ["u_demo", "u_venueadmin", "u_auditor", "u_admin"].includes(u.id))
+            {getState()
+              .users.filter((u) =>
+                ["u_demo", "u_buena_vida_admin", "u_auditor", "u_admin"].includes(u.id),
+              )
               .map((u) => (
                 <button
                   key={u.id}
@@ -99,9 +98,7 @@ function AuthPage() {
                   }}
                 >
                   <div className="font-semibold text-foreground">{u.fullName}</div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {u.roles.join(", ")}
-                  </div>
+                  <div className="text-[10px] text-muted-foreground">{u.roles.join(", ")}</div>
                 </button>
               ))}
           </div>
@@ -139,9 +136,13 @@ function LoginForm({ onDone }: { onDone: (role: string) => void }) {
       <div>
         <Label>Contraseña</Label>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <p className="text-xs text-muted-foreground mt-1">MVP demo: cualquier contraseña funciona.</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          MVP demo: cualquier contraseña funciona.
+        </p>
       </div>
-      <Button type="submit" className="w-full">Entrar</Button>
+      <Button type="submit" className="w-full">
+        Entrar
+      </Button>
     </form>
   );
 }
@@ -175,38 +176,68 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
     >
       <div>
         <Label>Nombre completo</Label>
-        <Input required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+        <Input
+          required
+          value={form.fullName}
+          onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+        />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label>Documento</Label>
-          <Input required value={form.docNumber} onChange={(e) => setForm({ ...form, docNumber: e.target.value })} />
+          <Input
+            required
+            value={form.docNumber}
+            onChange={(e) => setForm({ ...form, docNumber: e.target.value })}
+          />
         </div>
         <div>
           <Label>Ciudad</Label>
-          <Input required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+          <Input
+            required
+            value={form.city}
+            onChange={(e) => setForm({ ...form, city: e.target.value })}
+          />
         </div>
       </div>
       <div>
         <Label>Correo</Label>
-        <Input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <Input
+          type="email"
+          required
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
       </div>
       <div>
         <Label>Celular</Label>
-        <Input required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+        <Input
+          required
+          value={form.phone}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+        />
       </div>
       <div>
         <Label>Tipo de perfil</Label>
-        <Select value={form.profileKind} onValueChange={(v) => setForm({ ...form, profileKind: v as ProfileKind })}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
+        <Select
+          value={form.profileKind}
+          onValueChange={(v) => setForm({ ...form, profileKind: v as ProfileKind })}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             {(Object.entries(PROFILE_KIND_LABELS) as [ProfileKind, string][]).map(([k, l]) => (
-              <SelectItem key={k} value={k}>{l}</SelectItem>
+              <SelectItem key={k} value={k}>
+                {l}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full">Crear cuenta</Button>
+      <Button type="submit" className="w-full">
+        Crear cuenta
+      </Button>
     </form>
   );
 }

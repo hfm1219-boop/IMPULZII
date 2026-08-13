@@ -68,6 +68,18 @@ function load() {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<Snapshot>;
       state = { ...initial(), ...parsed };
+      const storedUsers = parsed.users ?? [];
+      state.users = [
+        ...storedUsers,
+        ...seedUsers.filter((seedUser) => !storedUsers.some((stored) => stored.id === seedUser.id)),
+      ];
+      const storedRewards = parsed.rewards ?? [];
+      state.rewards = [
+        ...storedRewards,
+        ...seedRewards.filter(
+          (seedReward) => !storedRewards.some((stored) => stored.id === seedReward.id),
+        ),
+      ];
     }
   } catch {
     // ignore

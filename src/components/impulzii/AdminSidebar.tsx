@@ -7,6 +7,7 @@ import {
   Users,
   Store,
   Gift,
+  ScanLine,
 } from "lucide-react";
 
 const items: { to: string; icon: typeof LayoutDashboard; label: string; exact?: boolean }[] = [
@@ -16,6 +17,7 @@ const items: { to: string; icon: typeof LayoutDashboard; label: string; exact?: 
   { to: "/admin/executions", icon: ShieldCheck, label: "Auditoría" },
   { to: "/admin/participants", icon: Users, label: "Participantes" },
   { to: "/admin/venues", icon: Store, label: "Establecimientos" },
+  { to: "/admin/redemptions", icon: ScanLine, label: "Validar token" },
   { to: "/admin/rewards", icon: Gift, label: "Recompensas" },
 ];
 
