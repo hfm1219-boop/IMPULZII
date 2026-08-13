@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/impulzii/auth-context";
 import type { Evidence } from "@/lib/impulzii/types";
 import { ArrowLeft, MapPin, Send } from "lucide-react";
 
-export const Route = createFileRoute("/app/missions/$id/execute")({
+export const Route = createFileRoute("/app/missions_/$id/execute")({
   component: ExecutePage,
 });
 
