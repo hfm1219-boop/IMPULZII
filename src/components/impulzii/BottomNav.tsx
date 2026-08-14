@@ -20,7 +20,7 @@ export function BottomNav() {
           className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <div className="text-xl font-black tracking-tight">
-            Kick<span className="text-primary">er</span>
+            KICK<span className="text-primary">ER</span>
           </div>
         </Link>
       </div>

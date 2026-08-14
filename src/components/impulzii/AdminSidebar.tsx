@@ -66,7 +66,7 @@ export function AdminSidebar() {
             aria-label="Ir a la página de bienvenida de Kicker"
             className="inline-block rounded-md text-xl font-black tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
           >
-            Kick<span className="text-sidebar-primary">er</span>
+            KICK<span className="text-sidebar-primary">ER</span>
           </Link>
           <div className="text-xs uppercase tracking-wider text-sidebar-foreground/60 mt-1">
             Panel administrativo
