@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/impulzii/auth-context";
 import { RewardService } from "@/lib/impulzii/services";
 
 export const Route = createFileRoute("/admin/redemptions")({
-  head: () => ({ meta: [{ title: "Validar token · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Validar token · Kicker" }] }),
   component: RedemptionValidator,
 });
 

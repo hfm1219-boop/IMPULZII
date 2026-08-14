@@ -19,6 +19,7 @@ import { Route as AdminExecutionsRouteImport } from './routes/admin.executions'
 import { Route as AdminMissionsRouteImport } from './routes/admin.missions'
 import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
 import { Route as AdminRedemptionsRouteImport } from './routes/admin.redemptions'
+import { Route as AdminRewardsRouteImport } from './routes/admin.rewards'
 import { Route as AdminVenuesRouteImport } from './routes/admin.venues'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppActivityRouteImport } from './routes/app.activity'
@@ -33,7 +34,7 @@ import { Route as AdminMissionsIndexRouteImport } from './routes/admin.missions.
 import { Route as AdminMissionsIdRouteImport } from './routes/admin.missions.$id'
 import { Route as AppMissionsIndexRouteImport } from './routes/app.missions.index'
 import { Route as AppMissionsIdRouteImport } from './routes/app.missions.$id'
-import { Route as AppMissionsIdExecuteRouteImport } from './routes/app.missions.$id.execute'
+import { Route as AppMissionsIdExecuteRouteImport } from './routes/app.missions_.$id.execute'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +84,11 @@ const AdminParticipantsRoute = AdminParticipantsRouteImport.update({
 const AdminRedemptionsRoute = AdminRedemptionsRouteImport.update({
   id: '/redemptions',
   path: '/redemptions',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRewardsRoute = AdminRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminVenuesRoute = AdminVenuesRouteImport.update({
@@ -156,9 +162,9 @@ const AppMissionsIdRoute = AppMissionsIdRouteImport.update({
   getParentRoute: () => AppMissionsRoute,
 } as any)
 const AppMissionsIdExecuteRoute = AppMissionsIdExecuteRouteImport.update({
-  id: '/execute',
-  path: '/execute',
-  getParentRoute: () => AppMissionsIdRoute,
+  id: '/missions_/$id/execute',
+  path: '/missions/$id/execute',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/admin/missions': typeof AdminMissionsRouteWithChildren
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/redemptions': typeof AdminRedemptionsRoute
+  '/admin/rewards': typeof AdminRewardsRoute
   '/admin/venues': typeof AdminVenuesRoute
   '/app/activity': typeof AppActivityRoute
   '/app/missions': typeof AppMissionsRouteWithChildren
@@ -182,7 +189,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/admin/executions/$id': typeof AdminExecutionsIdRoute
   '/admin/missions/$id': typeof AdminMissionsIdRoute
-  '/app/missions/$id': typeof AppMissionsIdRouteWithChildren
+  '/app/missions/$id': typeof AppMissionsIdRoute
   '/admin/executions/': typeof AdminExecutionsIndexRoute
   '/admin/missions/': typeof AdminMissionsIndexRoute
   '/app/missions/': typeof AppMissionsIndexRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/redemptions': typeof AdminRedemptionsRoute
+  '/admin/rewards': typeof AdminRewardsRoute
   '/admin/venues': typeof AdminVenuesRoute
   '/app/activity': typeof AppActivityRoute
   '/app/profile': typeof AppProfileRoute
@@ -204,7 +212,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/admin/executions/$id': typeof AdminExecutionsIdRoute
   '/admin/missions/$id': typeof AdminMissionsIdRoute
-  '/app/missions/$id': typeof AppMissionsIdRouteWithChildren
+  '/app/missions/$id': typeof AppMissionsIdRoute
   '/admin/executions': typeof AdminExecutionsIndexRoute
   '/admin/missions': typeof AdminMissionsIndexRoute
   '/app/missions': typeof AppMissionsIndexRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/admin/missions': typeof AdminMissionsRouteWithChildren
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/redemptions': typeof AdminRedemptionsRoute
+  '/admin/rewards': typeof AdminRewardsRoute
   '/admin/venues': typeof AdminVenuesRoute
   '/app/activity': typeof AppActivityRoute
   '/app/missions': typeof AppMissionsRouteWithChildren
@@ -232,11 +241,11 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/admin/executions/$id': typeof AdminExecutionsIdRoute
   '/admin/missions/$id': typeof AdminMissionsIdRoute
-  '/app/missions/$id': typeof AppMissionsIdRouteWithChildren
+  '/app/missions/$id': typeof AppMissionsIdRoute
   '/admin/executions/': typeof AdminExecutionsIndexRoute
   '/admin/missions/': typeof AdminMissionsIndexRoute
   '/app/missions/': typeof AppMissionsIndexRoute
-  '/app/missions/$id/execute': typeof AppMissionsIdExecuteRoute
+  '/app/missions_/$id/execute': typeof AppMissionsIdExecuteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/admin/missions'
     | '/admin/participants'
     | '/admin/redemptions'
+    | '/admin/rewards'
     | '/admin/venues'
     | '/app/activity'
     | '/app/missions'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/admin/campaigns'
     | '/admin/participants'
     | '/admin/redemptions'
+    | '/admin/rewards'
     | '/admin/venues'
     | '/app/activity'
     | '/app/profile'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/admin/missions'
     | '/admin/participants'
     | '/admin/redemptions'
+    | '/admin/rewards'
     | '/admin/venues'
     | '/app/activity'
     | '/app/missions'
@@ -314,7 +326,7 @@ export interface FileRouteTypes {
     | '/admin/executions/'
     | '/admin/missions/'
     | '/app/missions/'
-    | '/app/missions/$id/execute'
+    | '/app/missions_/$id/execute'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -394,6 +406,13 @@ declare module '@tanstack/react-router' {
       path: '/redemptions'
       fullPath: '/admin/redemptions'
       preLoaderRoute: typeof AdminRedemptionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rewards': {
+      id: '/admin/rewards'
+      path: '/rewards'
+      fullPath: '/admin/rewards'
+      preLoaderRoute: typeof AdminRewardsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/venues': {
@@ -494,12 +513,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMissionsIdRouteImport
       parentRoute: typeof AppMissionsRoute
     }
-    '/app/missions/$id/execute': {
-      id: '/app/missions/$id/execute'
-      path: '/execute'
+    '/app/missions_/$id/execute': {
+      id: '/app/missions_/$id/execute'
+      path: '/missions/$id/execute'
       fullPath: '/app/missions/$id/execute'
       preLoaderRoute: typeof AppMissionsIdExecuteRouteImport
-      parentRoute: typeof AppMissionsIdRoute
+      parentRoute: typeof AppRoute
     }
   }
 }
@@ -538,6 +557,7 @@ interface AdminRouteChildren {
   AdminMissionsRoute: typeof AdminMissionsRouteWithChildren
   AdminParticipantsRoute: typeof AdminParticipantsRoute
   AdminRedemptionsRoute: typeof AdminRedemptionsRoute
+  AdminRewardsRoute: typeof AdminRewardsRoute
   AdminVenuesRoute: typeof AdminVenuesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -548,31 +568,20 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMissionsRoute: AdminMissionsRouteWithChildren,
   AdminParticipantsRoute: AdminParticipantsRoute,
   AdminRedemptionsRoute: AdminRedemptionsRoute,
+  AdminRewardsRoute: AdminRewardsRoute,
   AdminVenuesRoute: AdminVenuesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface AppMissionsIdRouteChildren {
-  AppMissionsIdExecuteRoute: typeof AppMissionsIdExecuteRoute
-}
-
-const AppMissionsIdRouteChildren: AppMissionsIdRouteChildren = {
-  AppMissionsIdExecuteRoute: AppMissionsIdExecuteRoute,
-}
-
-const AppMissionsIdRouteWithChildren = AppMissionsIdRoute._addFileChildren(
-  AppMissionsIdRouteChildren,
-)
-
 interface AppMissionsRouteChildren {
-  AppMissionsIdRoute: typeof AppMissionsIdRouteWithChildren
+  AppMissionsIdRoute: typeof AppMissionsIdRoute
   AppMissionsIndexRoute: typeof AppMissionsIndexRoute
 }
 
 const AppMissionsRouteChildren: AppMissionsRouteChildren = {
-  AppMissionsIdRoute: AppMissionsIdRouteWithChildren,
+  AppMissionsIdRoute: AppMissionsIdRoute,
   AppMissionsIndexRoute: AppMissionsIndexRoute,
 }
 
@@ -588,6 +597,7 @@ interface AppRouteChildren {
   AppVenuesRoute: typeof AppVenuesRoute
   AppWalletRoute: typeof AppWalletRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppMissionsIdExecuteRoute: typeof AppMissionsIdExecuteRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -598,6 +608,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppVenuesRoute: AppVenuesRoute,
   AppWalletRoute: AppWalletRoute,
   AppIndexRoute: AppIndexRoute,
+  AppMissionsIdExecuteRoute: AppMissionsIdExecuteRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

@@ -9,19 +9,13 @@ import { getState } from "@/lib/impulzii/store";
 
 export function MissionCard({ mission }: { mission: Mission }) {
   const campaign = CampaignService.byId(mission.campaignId);
-  const brand = campaign
-    ? getState().brands.find((b) => b.id === campaign.brandId)
-    : undefined;
+  const brand = campaign ? getState().brands.find((b) => b.id === campaign.brandId) : undefined;
   const daysLeft = Math.max(
     0,
-    Math.ceil((new Date(mission.endDate).getTime() - Date.now()) / (86400000)),
+    Math.ceil((new Date(mission.endDate).getTime() - Date.now()) / 86400000),
   );
   return (
-    <Link
-      to="/app/missions/$id"
-      params={{ id: mission.id }}
-      className="block"
-    >
+    <Link to="/app/missions/$id" params={{ id: mission.id }} className="block">
       <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-l-primary">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -33,12 +27,8 @@ export function MissionCard({ mission }: { mission: Mission }) {
                 {MISSION_TYPE_LABELS[mission.type]}
               </Badge>
             </div>
-            <h3 className="font-semibold text-base leading-tight truncate">
-              {mission.name}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-              {mission.description}
-            </p>
+            <h3 className="font-semibold text-base leading-tight truncate">{mission.name}</h3>
+            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{mission.description}</p>
           </div>
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg gradient-brand text-primary-foreground">
             <Target className="h-6 w-6" />

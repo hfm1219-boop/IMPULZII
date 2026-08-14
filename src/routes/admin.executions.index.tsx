@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/impulzii/EmptyState";
 import type { ExecutionStatus } from "@/lib/impulzii/types";
 
 export const Route = createFileRoute("/admin/executions/")({
-  head: () => ({ meta: [{ title: "Auditoría · Impulzii Admin" }] }),
+  head: () => ({ meta: [{ title: "Auditoría · Kicker Admin" }] }),
   component: List,
 });
 
@@ -19,9 +19,9 @@ function List() {
   const state = useLive(() => getState());
   const filter = (e: (typeof state.executions)[number]) =>
     tab === "pending" ? ["submitted", "in_review"].includes(e.status) : e.status === tab;
-  const filtered = state.executions.filter(filter).sort((a, b) =>
-    (b.submittedAt ?? "").localeCompare(a.submittedAt ?? ""),
-  );
+  const filtered = state.executions
+    .filter(filter)
+    .sort((a, b) => (b.submittedAt ?? "").localeCompare(a.submittedAt ?? ""));
 
   return (
     <div className="space-y-4">
@@ -52,7 +52,8 @@ function List() {
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold truncate">{m?.name}</div>
                     <div className="text-xs text-muted-foreground truncate">
-                      {u?.fullName} · {v?.commercialName} · {e.submittedAt ? new Date(e.submittedAt).toLocaleString() : "—"}
+                      {u?.fullName} · {v?.commercialName} ·{" "}
+                      {e.submittedAt ? new Date(e.submittedAt).toLocaleString() : "—"}
                     </div>
                   </div>
                   <StatusBadge status={e.status} />

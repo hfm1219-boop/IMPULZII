@@ -4,9 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { useLive } from "@/lib/impulzii/auth-context";
 import { getState } from "@/lib/impulzii/store";
 import { MISSION_TYPE_LABELS } from "@/lib/impulzii/types";
+import { CreateMissionDialog } from "@/components/impulzii/AdminCreateDialogs";
 
 export const Route = createFileRoute("/admin/missions/")({
-  head: () => ({ meta: [{ title: "Misiones · Impulzii Admin" }] }),
+  head: () => ({ meta: [{ title: "Misiones · Kicker Admin" }] }),
   component: MissionList,
 });
 
@@ -14,8 +15,9 @@ function MissionList() {
   const state = useLive(() => getState());
   return (
     <div className="space-y-4">
-      <header>
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-black">Misiones</h1>
+        <CreateMissionDialog />
       </header>
       <div className="grid gap-2">
         {state.missions.map((m) => {
@@ -30,7 +32,9 @@ function MissionList() {
                     <div className="flex flex-wrap gap-1 mb-1">
                       <Badge variant="outline">{brand?.name}</Badge>
                       <Badge variant="secondary">{MISSION_TYPE_LABELS[m.type]}</Badge>
-                      <Badge variant={m.status === "active" ? "default" : "outline"}>{m.status}</Badge>
+                      <Badge variant={m.status === "active" ? "default" : "outline"}>
+                        {m.status}
+                      </Badge>
                     </div>
                     <div className="font-semibold truncate">{m.name}</div>
                     <div className="text-xs text-muted-foreground">

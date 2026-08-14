@@ -6,13 +6,13 @@ import { Target, Award, Store, ShieldCheck } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Impulzii — Convierte tu turno en recompensas" },
+      { title: "Kicker — Convierte tu turno en recompensas" },
       {
         name: "description",
         content:
           "Meseros, bartenders, vendedores, promotores y tenderos: ejecuta misiones comerciales de tus marcas favoritas y gana puntos por cada actividad aprobada.",
       },
-      { property: "og:title", content: "Impulzii — Misiones comerciales con recompensas" },
+      { property: "og:title", content: "Kicker — Misiones comerciales con recompensas" },
       {
         property: "og:description",
         content:
@@ -48,9 +48,8 @@ function Landing() {
             en <span className="gradient-brand bg-clip-text text-transparent">recompensas</span>.
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground">
-            Impulzii conecta marcas y distribuidores con meseros, bartenders,
-            vendedores, promotores y tenderos que ejecutan actividades comerciales
-            y ganan puntos por cada misión validada.
+            Kicker conecta marcas y distribuidores con meseros, bartenders, vendedores, promotores y
+            tenderos que ejecutan actividades comerciales y ganan puntos por cada misión validada.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/auth" search={{ mode: "register" }}>
@@ -66,10 +65,26 @@ function Landing() {
 
         <section className="max-w-6xl mx-auto px-4 pb-24 grid gap-4 md:grid-cols-4">
           {[
-            { icon: Target, title: "Misiones a tu medida", desc: "Ves solo actividades para tu ciudad, tu perfil y tu establecimiento." },
-            { icon: Store, title: "Vincúlate a tu punto de venta", desc: "Restaurantes, bares, hoteles, tiendas y más." },
-            { icon: Award, title: "Puntos por cada misión", desc: "Redime en el catálogo de recompensas." },
-            { icon: ShieldCheck, title: "Validación transparente", desc: "Foto, ubicación y auditoría en cada evidencia." },
+            {
+              icon: Target,
+              title: "Misiones a tu medida",
+              desc: "Ves solo actividades para tu ciudad, tu perfil y tu establecimiento.",
+            },
+            {
+              icon: Store,
+              title: "Vincúlate a tu punto de venta",
+              desc: "Restaurantes, bares, hoteles, tiendas y más.",
+            },
+            {
+              icon: Award,
+              title: "Puntos por cada misión",
+              desc: "Redime en el catálogo de recompensas.",
+            },
+            {
+              icon: ShieldCheck,
+              title: "Validación transparente",
+              desc: "Foto, ubicación y auditoría en cada evidencia.",
+            },
           ].map((f) => (
             <div key={f.title} className="rounded-xl border border-border bg-card p-5">
               <div className="grid h-10 w-10 place-items-center rounded-lg gradient-brand text-primary-foreground">
@@ -83,7 +98,7 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Impulzii — impulzii.com
+        © {new Date().getFullYear()} Kicker — kicker.com
       </footer>
     </div>
   );

@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/missions/")({
-  head: () => ({ meta: [{ title: "Misiones · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Misiones · Kicker" }] }),
   component: Missions,
 });
 
@@ -43,7 +43,10 @@ function Missions() {
         </TabsList>
         <TabsContent value="available" className="mt-4 space-y-3">
           {data.available.length === 0 ? (
-            <EmptyState title="No hay misiones disponibles" description="Revisa que estés vinculado a un establecimiento habilitado." />
+            <EmptyState
+              title="No hay misiones disponibles"
+              description="Revisa que estés vinculado a un establecimiento habilitado."
+            />
           ) : (
             data.available.map((m) => <MissionCard key={m.id} mission={m} />)
           )}

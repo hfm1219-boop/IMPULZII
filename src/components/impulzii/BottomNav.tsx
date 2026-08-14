@@ -16,18 +16,17 @@ export function BottomNav() {
       <div className="hidden md:block px-4 pb-4">
         <Link
           to="/"
-          aria-label="Ir a la página de bienvenida de Impulzii"
+          aria-label="Ir a la página de bienvenida de Kicker"
           className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <div className="text-xl font-black tracking-tight">
-            Impulz<span className="text-primary">ii</span>
+            KICK<span className="text-primary">ER</span>
           </div>
         </Link>
       </div>
       <ul className="flex md:flex-col justify-around md:justify-start md:gap-1 md:px-2">
         {items.map((it) => {
-          const active =
-            it.to === "/app" ? path === "/app" : path.startsWith(it.to);
+          const active = it.to === "/app" ? path === "/app" : path.startsWith(it.to);
           const Icon = it.icon;
           return (
             <li key={it.to} className="flex-1 md:flex-none">

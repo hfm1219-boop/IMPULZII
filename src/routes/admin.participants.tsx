@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useLive } from "@/lib/impulzii/auth-context";
 import { getState } from "@/lib/impulzii/store";
-import { WalletService } from "@/lib/impulzii/services";
+import { UserService, WalletService } from "@/lib/impulzii/services";
 import { PROFILE_KIND_LABELS } from "@/lib/impulzii/types";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/participants")({
-  head: () => ({ meta: [{ title: "Participantes · Impulzii Admin" }] }),
+  head: () => ({ meta: [{ title: "Participantes · Kicker Admin" }] }),
   component: Participants,
 });
 
@@ -23,7 +25,7 @@ function Participants() {
         {participants.map((p) => {
           const b = WalletService.balance(p.id);
           return (
-            <Card key={p.id} className="p-4 flex items-center justify-between gap-3">
+            <Card key={p.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="h-10 w-10 rounded-full gradient-brand grid place-items-center text-primary-foreground font-black shrink-0">
                   {p.fullName.charAt(0)}
@@ -35,9 +37,35 @@ function Participants() {
                   </div>
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <div className="text-sm font-black text-primary">{b.available} pts</div>
-                <Badge variant={p.active ? "default" : "outline"}>{p.active ? "activo" : "inactivo"}</Badge>
+              <div className="flex shrink-0 items-center gap-2 text-right">
+                <div>
+                  <div className="text-sm font-black text-primary">{b.available} pts</div>
+                  <Badge variant={p.active ? "default" : "outline"}>
+                    {p.active ? "activo" : "inactivo"}
+                  </Badge>
+                </div>
+                {p.verification !== "verified" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      UserService.update(p.id, { verification: "verified" });
+                      toast.success("Participante verificado");
+                    }}
+                  >
+                    Verificar
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant={p.active ? "destructive" : "outline"}
+                  onClick={() => {
+                    UserService.toggleBlock(p.id);
+                    toast.success(p.active ? "Participante bloqueado" : "Participante activado");
+                  }}
+                >
+                  {p.active ? "Bloquear" : "Activar"}
+                </Button>
               </div>
             </Card>
           );

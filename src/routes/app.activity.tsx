@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/impulzii/StatusBadge";
 import { EmptyState } from "@/components/impulzii/EmptyState";
 
 export const Route = createFileRoute("/app/activity")({
-  head: () => ({ meta: [{ title: "Actividad · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Actividad · Kicker" }] }),
   component: Activity,
 });
 
@@ -24,7 +24,10 @@ function Activity() {
     <div className="space-y-4">
       <h1 className="text-2xl font-black">Actividad</h1>
       {execs.length === 0 ? (
-        <EmptyState title="Aún no tienes ejecuciones" description="Acepta una misión desde la sección Misiones." />
+        <EmptyState
+          title="Aún no tienes ejecuciones"
+          description="Acepta una misión desde la sección Misiones."
+        />
       ) : (
         Object.entries(groups).map(([status, list]) => (
           <section key={status} className="space-y-2">

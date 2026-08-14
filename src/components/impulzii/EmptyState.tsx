@@ -15,9 +15,7 @@ export function EmptyState({
     <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
       {icon ? <div className="mx-auto mb-3 text-muted-foreground">{icon}</div> : null}
       <h3 className="text-base font-semibold">{title}</h3>
-      {description ? (
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      ) : null}
+      {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
   );

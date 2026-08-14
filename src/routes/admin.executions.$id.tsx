@@ -20,7 +20,20 @@ function ExecReview() {
   const navigate = useNavigate();
   const [note, setNote] = useState("");
   const exec = useLive(() => getState().executions.find((e) => e.id === id));
-  if (!exec || !user) return null;
+  if (!user) return null;
+  if (!exec) {
+    return (
+      <Card className="p-6 text-center">
+        <h1 className="font-bold">Ejecución no encontrada</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          La ejecución pudo haber sido eliminada o el enlace no es válido.
+        </p>
+        <Button asChild className="mt-4">
+          <Link to="/admin/executions">Volver a auditoría</Link>
+        </Button>
+      </Card>
+    );
+  }
 
   const mission = MissionService.byId(exec.missionId);
   const participant = getState().users.find((u) => u.id === exec.userId);
@@ -28,7 +41,8 @@ function ExecReview() {
 
   const act = (kind: "approve" | "reject" | "needs_fix") => {
     try {
-      if (kind === "approve") ExecutionService.review(exec.id, user.id, "approved", note || undefined);
+      if (kind === "approve")
+        ExecutionService.review(exec.id, user.id, "approved", note || undefined);
       if (kind === "reject") {
         if (!note) return toast.error("Escribe el motivo del rechazo");
         ExecutionService.review(exec.id, user.id, "rejected", note);
@@ -46,7 +60,10 @@ function ExecReview() {
 
   return (
     <div className="space-y-4">
-      <Link to="/admin/executions" className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+      <Link
+        to="/admin/executions"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Volver a la cola
       </Link>
 
@@ -63,11 +80,18 @@ function ExecReview() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="p-4 space-y-2 text-sm">
           <h3 className="font-semibold">Detalles</h3>
-          <Row label="Enviado" value={exec.submittedAt ? new Date(exec.submittedAt).toLocaleString() : "—"} />
+          <Row
+            label="Enviado"
+            value={exec.submittedAt ? new Date(exec.submittedAt).toLocaleString() : "—"}
+          />
           <Row label="Recompensa" value={`${mission?.rewardPoints ?? 0} pts`} />
           <Row label="Establecimiento" value={venue?.commercialName ?? "—"} />
           {exec.lat !== undefined && (
-            <Row label="Ubicación" value={`${exec.lat.toFixed(5)}, ${exec.lng?.toFixed(5)}`} icon={MapPin} />
+            <Row
+              label="Ubicación"
+              value={`${exec.lat.toFixed(5)}, ${exec.lng?.toFixed(5)}`}
+              icon={MapPin}
+            />
           )}
         </Card>
 
@@ -76,9 +100,7 @@ function ExecReview() {
           {mission?.fields.map((f) => (
             <div key={f.id} className="text-sm">
               <div className="text-xs text-muted-foreground">{f.label}</div>
-              <div className="font-medium break-words">
-                {formatValue(exec.answers[f.id])}
-              </div>
+              <div className="font-medium break-words">{formatValue(exec.answers[f.id])}</div>
             </div>
           ))}
         </Card>
@@ -105,7 +127,9 @@ function ExecReview() {
         <Card className="p-4 border-orange-500/40 bg-orange-500/5">
           <div className="flex gap-2 text-sm">
             <AlertCircle className="h-4 w-4 text-orange-500" />
-            <div><strong>Corrección solicitada:</strong> {exec.reviewNotes}</div>
+            <div>
+              <strong>Corrección solicitada:</strong> {exec.reviewNotes}
+            </div>
           </div>
         </Card>
       )}

@@ -23,7 +23,10 @@ function MissionDetail() {
 
   return (
     <div className="space-y-4">
-      <Link to="/admin/missions" className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+      <Link
+        to="/admin/missions"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Misiones
       </Link>
       <header>
@@ -37,9 +40,20 @@ function MissionDetail() {
 
       <div className="grid gap-3 md:grid-cols-4">
         <Kpi label="Recompensa" value={`${m.rewardPoints} pts`} />
-        <Kpi label="Cupos" value={m.totalQuota ? `${execs.length}/${m.totalQuota}` : execs.length.toString()} />
-        <Kpi label="Aprobadas" value={execs.filter((e) => e.status === "approved").length.toString()} />
-        <Kpi label="Pendientes" value={execs.filter((e) => ["submitted", "in_review"].includes(e.status)).length.toString()} />
+        <Kpi
+          label="Cupos"
+          value={m.totalQuota ? `${execs.length}/${m.totalQuota}` : execs.length.toString()}
+        />
+        <Kpi
+          label="Aprobadas"
+          value={execs.filter((e) => e.status === "approved").length.toString()}
+        />
+        <Kpi
+          label="Pendientes"
+          value={execs
+            .filter((e) => ["submitted", "in_review"].includes(e.status))
+            .length.toString()}
+        />
       </div>
 
       <Card className="p-4">
@@ -61,7 +75,9 @@ function MissionDetail() {
               </Link>
             );
           })}
-          {execs.length === 0 && <p className="text-sm text-muted-foreground">Aún sin ejecuciones.</p>}
+          {execs.length === 0 && (
+            <p className="text-sm text-muted-foreground">Aún sin ejecuciones.</p>
+          )}
         </div>
       </Card>
     </div>

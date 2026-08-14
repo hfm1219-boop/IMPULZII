@@ -10,7 +10,7 @@ import { LogOut, Store } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/profile")({
-  head: () => ({ meta: [{ title: "Mi perfil · Impulzii" }] }),
+  head: () => ({ meta: [{ title: "Mi perfil · Kicker" }] }),
   component: Profile,
 });
 
@@ -18,7 +18,15 @@ function Profile() {
   const { user, refresh } = useAuth();
   const navigate = useNavigate();
   const venues = useLive(() =>
-    user ? getState().venues.filter((v) => VenueService.membershipsForUser(user.id).some(mem=>mem.venueId===v.id && mem.status==="approved")) : [],
+    user
+      ? getState().venues.filter(
+          (venue) =>
+            venue.active &&
+            VenueService.membershipsForUser(user.id).some(
+              (membership) => membership.venueId === venue.id && membership.status === "approved",
+            ),
+        )
+      : [],
   );
   if (!user) return null;
 
@@ -33,7 +41,11 @@ function Profile() {
             <h1 className="text-xl font-black truncate">{user.fullName}</h1>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
             <div className="mt-1 flex flex-wrap gap-1">
-              {user.roles.map((r) => <Badge key={r} variant="secondary">{r}</Badge>)}
+              {user.roles.map((r) => (
+                <Badge key={r} variant="secondary">
+                  {r}
+                </Badge>
+              ))}
             </div>
           </div>
         </div>
@@ -48,7 +60,9 @@ function Profile() {
 
       <section>
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold flex items-center gap-2"><Store className="h-4 w-4" /> Establecimientos</h2>
+          <h2 className="font-semibold flex items-center gap-2">
+            <Store className="h-4 w-4" /> Establecimientos
+          </h2>
         </div>
         {venues.length === 0 ? (
           <Card className="p-4 text-sm text-muted-foreground">
@@ -59,7 +73,9 @@ function Profile() {
             {venues.map((v) => (
               <Card key={v.id} className="p-3">
                 <div className="font-semibold">{v.commercialName}</div>
-                <div className="text-xs text-muted-foreground">{v.city} · {v.type}</div>
+                <div className="text-xs text-muted-foreground">
+                  {v.city} · {v.type}
+                </div>
               </Card>
             ))}
           </div>
@@ -95,14 +111,26 @@ function Row({ label, value }: { label: string; value: string }) {
 
 function VenueJoin() {
   const { user, refresh } = useAuth();
-  const venues = useLive(() => getState().venues);
+  const venues = useLive(() => getState().venues.filter((venue) => venue.active));
   if (!user) return null;
-  const available = venues.filter((v) => !VenueService.membershipsForUser(user.id).some(mem=>mem.venueId===v.id && mem.status==="approved"));
+  const available = venues.filter(
+    (venue) =>
+      !VenueService.membershipsForUser(user.id).some(
+        (membership) => membership.venueId === venue.id && membership.status === "approved",
+      ),
+  );
 
   return (
     <details className="rounded-md border border-border p-3">
-      <summary className="cursor-pointer text-sm font-medium">Vincular otro establecimiento</summary>
+      <summary className="cursor-pointer text-sm font-medium">
+        Vincular otro establecimiento
+      </summary>
       <div className="mt-3 space-y-2">
+        {available.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            Ya estás vinculado a todos los establecimientos disponibles.
+          </p>
+        )}
         {available.map((v) => (
           <div key={v.id} className="flex items-center justify-between text-sm">
             <span>{v.commercialName}</span>

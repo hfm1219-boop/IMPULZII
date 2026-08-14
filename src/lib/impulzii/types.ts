@@ -1,4 +1,4 @@
-// Impulzii — domain models
+// Kicker — domain models
 export type ProfileKind =
   | "waiter"
   | "bartender"
@@ -262,6 +262,7 @@ export interface WalletTransaction {
   concept: string;
   missionId?: string;
   executionId?: string;
+  redemptionId?: string;
   createdAt: string;
   status: "pending" | "confirmed" | "reversed";
 }
